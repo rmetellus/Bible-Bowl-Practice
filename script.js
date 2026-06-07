@@ -43,58 +43,138 @@ function init(){
 }
 
 function initAudio(){
-  bgMusic=$('bgMusic');
+
+  bgMusic = $('bgMusic');
+
   if(bgMusic){
-    bgMusic.volume=settings.volume;
+    bgMusic.volume = settings.volume;
   }
 
-  const musicToggle=$('musicToggle');
-  const quizMusicToggle=$('quizMusicToggle');
-  const soundToggle=$('soundToggle');
-  const volumeSlider=$('volumeSlider');
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  if(musicToggle) musicToggle.checked=settings.music;
-  if(quizMusicToggle) quizMusicToggle.checked=settings.quizMusic;
-  if(soundToggle) soundToggle.checked=settings.sound;
-  if(volumeSlider) volumeSlider.value=Math.round(settings.volume*100);
+  const volumeBox = $('volumeControlBox');
+  const iosNote = $('iosVolumeNote');
 
-  if(musicToggle){
-    musicToggle.addEventListener('change',()=>{
-      settings.music=musicToggle.checked;
-      localStorage.setItem('bbpMusic',settings.music);
-      handleMusicForScreen(getActiveScreenId());
-    });
+  if(isIOS){
+    if(volumeBox) volumeBox.style.display = "none";
+    if(iosNote) iosNote.classList.remove("hidden");
   }
 
-  if(quizMusicToggle){
-    quizMusicToggle.addEventListener('change',()=>{
-      settings.quizMusic=quizMusicToggle.checked;
-      localStorage.setItem('bbpQuizMusic',settings.quizMusic);
-      handleMusicForScreen(getActiveScreenId());
-    });
-  }
+  updateSettingsButtons();
 
-  if(soundToggle){
-    soundToggle.addEventListener('change',()=>{
-      settings.sound=soundToggle.checked;
-      localStorage.setItem('bbpSound',settings.sound);
-    });
-  }
+  const volumeSlider = $('volumeSlider');
 
   if(volumeSlider){
+
+    volumeSlider.value = Math.round(settings.volume * 100);
+
     volumeSlider.addEventListener('input',()=>{
-      settings.volume=Number(volumeSlider.value)/100;
-      localStorage.setItem('bbpVolume',settings.volume);
-      if(bgMusic) bgMusic.volume=settings.volume;
+
+      settings.volume = Number(volumeSlider.value)/100;
+
+      localStorage.setItem(
+        'bbpVolume',
+        settings.volume
+      );
+
+      if(bgMusic){
+        bgMusic.volume = settings.volume;
+      }
+
     });
+
   }
 
   document.addEventListener('click',()=>{
+
     if(!audioStarted){
-      audioStarted=true;
-      handleMusicForScreen(getActiveScreenId());
+
+      audioStarted = true;
+
+      handleMusicForScreen(
+        getActiveScreenId()
+      );
+
     }
+
   },{once:true});
+
+}
+
+function updateSettingsButtons(){
+
+  const musicBtn = $('musicToggleBtn');
+  const soundBtn = $('soundToggleBtn');
+  const quizBtn = $('quizMusicToggleBtn');
+
+  if(musicBtn){
+    musicBtn.textContent =
+      settings.music
+      ? '🎵 Music: ON'
+      : '🎵 Music: OFF';
+  }
+
+  if(soundBtn){
+    soundBtn.textContent =
+      settings.sound
+      ? '🔊 Sound FX: ON'
+      : '🔇 Sound FX: OFF';
+  }
+
+  if(quizBtn){
+    quizBtn.textContent =
+      settings.quizMusic
+      ? '🎮 Quiz Music: ON'
+      : '🎮 Quiz Music: OFF';
+  }
+
+}
+
+function toggleMusicSetting(){
+
+  settings.music = !settings.music;
+
+  localStorage.setItem(
+    'bbpMusic',
+    settings.music
+  );
+
+  updateSettingsButtons();
+
+  handleMusicForScreen(
+    getActiveScreenId()
+  );
+
+}
+
+function toggleSoundSetting(){
+
+  settings.sound = !settings.sound;
+
+  localStorage.setItem(
+    'bbpSound',
+    settings.sound
+  );
+
+  updateSettingsButtons();
+
+}
+
+function toggleQuizMusicSetting(){
+
+  settings.quizMusic = !settings.quizMusic;
+
+  localStorage.setItem(
+    'bbpQuizMusic',
+    settings.quizMusic
+  );
+
+  updateSettingsButtons();
+
+  handleMusicForScreen(
+    getActiveScreenId()
+  );
+
 }
 
 function getActiveScreenId(){
