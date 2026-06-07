@@ -2,6 +2,8 @@ let selectedBookKey=null,selectedDifficulty=null,selectedMode=null,selectedStudy
 let currentQuestions=[],currentIndex=0,score=0,triesLeft=0,missedQuestions=[],answered=false,timer=null,timeLeft=10,startTime=null,streak=0,bestStreak=0,selectedChoice=null;
 let currentRoundMeta={}, tournamentMode=false, tournamentPoints=0, reviewQuestions=[];  let xp = Number(localStorage.getItem('bbpXP') || 0); let level = Number(localStorage.getItem('bbpLevel') || 1);
 
+let screenHistory = [];
+
 let bgMusic=null;
 let audioStarted=false;
 let settings={
@@ -28,11 +30,39 @@ const ACHIEVEMENTS=[
 
 function $(id){return document.getElementById(id)}
 
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+function showScreen(id, addToHistory = true){
+
+  const current =
+    document.querySelector('.screen.active');
+
+  if(current && addToHistory){
+    screenHistory.push(current.id);
+  }
+
+  document
+    .querySelectorAll('.screen')
+    .forEach(s=>s.classList.remove('active'));
+
   $(id).classList.add('active');
+
   clearTimer();
+
   handleMusicForScreen(id);
+
+}
+
+function goBack(){
+
+  if(screenHistory.length === 0){
+    showScreen('mainMenu', false);
+    return;
+  }
+
+  const previous =
+    screenHistory.pop();
+
+  showScreen(previous, false);
+
 }
 
 function init(){
