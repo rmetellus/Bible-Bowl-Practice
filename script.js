@@ -275,7 +275,7 @@ function updateStreakDisplay(){
 function loadQuestion(){clearTimer();answered=false;selectedChoice=null;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];triesLeft=s.tries;$('questionProgress').textContent=`${currentIndex+1}/${currentQuestions.length}`;$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;updateStreakDisplay();$('timerText').textContent=s.timer?'Time: 10':'';$('verseTag').textContent=q.verse;$('questionText').textContent=tournamentMode?`[${questionValue()} pts] ${q.question}`:q.question;$('triesText').textContent=`Tries Remaining: ${triesLeft}`;$('feedbackText').textContent='';$('feedbackText').className='';$('answerReveal').classList.add('hidden');$('submitBtn').classList.remove('hidden');$('nextBtn').classList.add('hidden');$('hintBtn').classList.toggle('hidden',!s.hints);$('answerInput').value='';$('answerInput').disabled=false;$('answerInput').style.display=s.multiple?'none':'block';$('multipleChoiceBox').classList.toggle('hidden',!s.multiple);if(s.multiple)renderChoices(q);else $('answerInput').focus();if(s.timer)startTimer();saveRound()}
 function renderChoices(q){const box=$('multipleChoiceBox');let pool=(BOOKS[selectedBookKey]?.questions||Object.values(BOOKS).flatMap(b=>b.questions)).filter(x=>x.answer!==q.answer).map(x=>x.answer);shuffle(pool);const choices=[q.answer,...pool.slice(0,3)];shuffle(choices);box.innerHTML=choices.map(c=>`<button class="choice" onclick="chooseAnswer(this, ${JSON.stringify(c).replace(/"/g,'&quot;')})">${c}</button>`).join('')}
 function chooseAnswer(btn,ans){selectedChoice=ans;document.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')}
-function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++;if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;updateStreakDisplay();$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
+function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++;if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');  if(streak===5 || streak===10 || streak===20){   playAchievementSound(); }$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;updateStreakDisplay();$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
 function finishQuestion(){clearTimer();answered=true;const q=currentQuestions[currentIndex];$('answerInput').disabled=true;$('submitBtn').classList.add('hidden');$('hintBtn').classList.add('hidden');$('nextBtn').classList.remove('hidden');$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;updateStreakDisplay();$('answerReveal').innerHTML=`<p><strong>Answer:</strong> ${q.answer}</p><p><strong>Verse:</strong> ${q.verse}</p>`;$('answerReveal').classList.remove('hidden');saveRound()}
 function nextQuestion(){currentIndex++;currentIndex>=currentQuestions.length?showResults():loadQuestion()}
 function showHint(){const q=currentQuestions[currentIndex];$('feedbackText').textContent=`Hint: ${q.hint||smartHint(q)}`;$('feedbackText').className=''}
@@ -334,26 +334,6 @@ function showAchievementPopup(achievement){
   setTimeout(()=>{
     popup.classList.add('hidden');
   },4000);
-}
-
-function showAchievementPopup(achievement){
-
-  const popup = $('achievementPopup');
-
-  if(!popup) return;
-
-  $('achievementPopupName').textContent =
-    achievement.name;
-
-  $('achievementPopupDesc').textContent =
-    achievement.desc;
-
-  popup.classList.remove('hidden');
-
-  setTimeout(()=>{
-    popup.classList.add('hidden');
-  },4000);
-
 }
 
 function updateAchievements(total,correct,accuracy){if(accuracy===100){unlock('perfect_round');if(currentRoundMeta.bookTitle==='Haggai')unlock('haggai_master')}const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');if((stats['Acts']?.answered||0)>=100)unlock('acts_missionary');if((stats['Isaiah']?.answered||0)>=250)unlock('isaiah_scholar');if((stats['Proverbs']?.answered||0)>=150)unlock('proverbs_sage');if((stats['2 Samuel']?.answered||0)>=75)unlock('samuel_kingdom');const bookTitles=Object.values(BOOKS).map(b=>b.title);if(bookTitles.every(t=>(stats[t]?.played||0)>0))unlock('champion')}
