@@ -1,7 +1,18 @@
 let selectedBookKey=null,selectedDifficulty=null,selectedMode=null,selectedStudyType='entire',selectedQuestions=[],selectedSetLabel='Entire Book';
 let currentQuestions=[],currentIndex=0,score=0,triesLeft=0,missedQuestions=[],answered=false,timer=null,timeLeft=10,startTime=null,streak=0,bestStreak=0,selectedChoice=null;
 let currentRoundMeta={}, tournamentMode=false, tournamentPoints=0, reviewQuestions=[];
+
+let bgMusic=null;
+let audioStarted=false;
+let settings={
+  music: localStorage.getItem('bbpMusic') !== 'false',
+  quizMusic: localStorage.getItem('bbpQuizMusic') !== 'false',
+  sound: localStorage.getItem('bbpSound') !== 'false',
+  volume: Number(localStorage.getItem('bbpVolume') || 0.35)
+};
+
 const difficultySettings={veryEasy:{label:'Very Easy',tries:3,hints:true,exact:false,timer:false,multiple:true},easy:{label:'Easy',tries:3,hints:true,exact:false,timer:false,multiple:false},medium:{label:'Medium',tries:2,hints:false,exact:false,timer:false,multiple:false},hard:{label:'Hard',tries:1,hints:false,exact:true,timer:true,multiple:false}};
+
 const ACHIEVEMENTS=[
   {id:'first_correct',name:'First Question Correct',desc:'Answer your first question correctly.'},
   {id:'streak_10',name:'Hot Streak',desc:'Get a 10-answer streak.'},
@@ -14,10 +25,141 @@ const ACHIEVEMENTS=[
   {id:'tournament_player',name:'Tournament Player',desc:'Complete a tournament round.'},
   {id:'champion',name:'Bible Bowl Champion',desc:'Complete at least one round in every book.'}
 ];
+
 function $(id){return document.getElementById(id)}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');clearTimer()}
-function init(){renderBookButtons();bestStreak=Number(localStorage.getItem('bbpBestStreak')||0);renderResumeNotice()}
-function renderResumeNotice(){const saved=loadSavedRound();const menu=$('mainMenu');let old=$('resumeBtn');if(old)old.remove();if(saved&&saved.currentQuestions?.length){const btn=document.createElement('button');btn.id='resumeBtn';btn.textContent=`Resume ${saved.bookTitle} — ${saved.index+1}/${saved.currentQuestions.length}`;btn.onclick=resumeRound;menu.insertBefore(btn,menu.children[1])}}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  clearTimer();
+  handleMusicForScreen(id);
+}
+
+function init(){
+  renderBookButtons();
+  bestStreak=Number(localStorage.getItem('bbpBestStreak')||0);
+  renderResumeNotice();
+  initAudio();
+}
+
+function initAudio(){
+  bgMusic=$('bgMusic');
+  if(bgMusic){
+    bgMusic.volume=settings.volume;
+  }
+
+  const musicToggle=$('musicToggle');
+  const quizMusicToggle=$('quizMusicToggle');
+  const soundToggle=$('soundToggle');
+  const volumeSlider=$('volumeSlider');
+
+  if(musicToggle) musicToggle.checked=settings.music;
+  if(quizMusicToggle) quizMusicToggle.checked=settings.quizMusic;
+  if(soundToggle) soundToggle.checked=settings.sound;
+  if(volumeSlider) volumeSlider.value=Math.round(settings.volume*100);
+
+  if(musicToggle){
+    musicToggle.addEventListener('change',()=>{
+      settings.music=musicToggle.checked;
+      localStorage.setItem('bbpMusic',settings.music);
+      handleMusicForScreen(getActiveScreenId());
+    });
+  }
+
+  if(quizMusicToggle){
+    quizMusicToggle.addEventListener('change',()=>{
+      settings.quizMusic=quizMusicToggle.checked;
+      localStorage.setItem('bbpQuizMusic',settings.quizMusic);
+      handleMusicForScreen(getActiveScreenId());
+    });
+  }
+
+  if(soundToggle){
+    soundToggle.addEventListener('change',()=>{
+      settings.sound=soundToggle.checked;
+      localStorage.setItem('bbpSound',settings.sound);
+    });
+  }
+
+  if(volumeSlider){
+    volumeSlider.addEventListener('input',()=>{
+      settings.volume=Number(volumeSlider.value)/100;
+      localStorage.setItem('bbpVolume',settings.volume);
+      if(bgMusic) bgMusic.volume=settings.volume;
+    });
+  }
+
+  document.addEventListener('click',()=>{
+    if(!audioStarted){
+      audioStarted=true;
+      handleMusicForScreen(getActiveScreenId());
+    }
+  },{once:true});
+}
+
+function getActiveScreenId(){
+  const active=document.querySelector('.screen.active');
+  return active?active.id:'mainMenu';
+}
+
+function handleMusicForScreen(screenId){
+  if(!bgMusic || !audioStarted) return;
+
+  const isQuizScreen=screenId==='gameScreen';
+  const shouldPlay=settings.music && (!isQuizScreen || settings.quizMusic);
+
+  if(shouldPlay){
+    bgMusic.play().catch(()=>{});
+  }else{
+    bgMusic.pause();
+  }
+}
+
+function showSettings(){
+  showScreen('settingsScreen');
+}
+
+function playTone(freq,duration,type='sine',volume=0.08){
+  if(!settings.sound) return;
+  const AudioContext=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContext) return;
+
+  const ctx=new AudioContext();
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+
+  osc.type=type;
+  osc.frequency.value=freq;
+  gain.gain.value=volume;
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
+  osc.stop(ctx.currentTime+duration);
+}
+
+function playCorrectSound(){
+  playTone(660,0.12,'sine',0.08);
+  setTimeout(()=>playTone(880,0.16,'sine',0.07),120);
+}
+
+function playWrongSound(){
+  playTone(180,0.18,'sawtooth',0.06);
+}
+
+function playAchievementSound(){
+  playTone(523,0.12,'sine',0.08);
+  setTimeout(()=>playTone(659,0.12,'sine',0.08),120);
+  setTimeout(()=>playTone(784,0.18,'sine',0.08),240);
+}
+
+function playTickSound(){
+  playTone(900,0.05,'square',0.04);
+}
+
+function renderResumeNotice(){const saved=loadSavedRound();const menu=$('mainMenu');let old=$('resumeBtn');if(old)old.remove();if(saved&&saved.currentQuestions?.length){const btn=document.createElement('button');btn.id='resumeBtn';btn.textContent=`Resume ${saved.bookTitle} — ${saved.currentIndex+1}/${saved.currentQuestions.length}`;btn.onclick=resumeRound;menu.insertBefore(btn,menu.children[1])}}
 function renderBookButtons(){const box=$('bookButtons');box.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>{const prog=getBookProgress(key);const btn=document.createElement('button');btn.innerHTML=`${b.title} (${b.questions.length})<br><small>${prog}</small>`;btn.onclick=()=>selectBook(key);box.appendChild(btn)})}
 function getBookProgress(key){const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');const title=BOOKS[key].title;const s=stats[title];return s?`Best: ${s.best} | Accuracy: ${s.answered?Math.round(s.correct/s.answered*100):0}%`:'Not Started'}
 function selectBook(key){selectedBookKey=key;const b=BOOKS[key];$('bookInfoTitle').textContent=b.title;$('bookInfoContent').innerHTML=`<h3>Summary</h3><p>${b.summary}</p><h3>Key Characters</h3><ul>${b.characters.map(x=>`<li>${x}</li>`).join('')}</ul><h3>Major Themes</h3><ol>${b.themes.map(x=>`<li>${x}</li>`).join('')}</ol><h3>Memory Verses</h3><p>${(b.memoryVerses||[]).map(v=>`<span class="pill">${v}</span>`).join('')}</p><p class="small">Questions loaded: ${b.questions.length}</p>`;showScreen('bookInfoScreen')}
@@ -30,12 +172,12 @@ function startGame(custom=null){tournamentMode=false;currentQuestions=custom?[..
 function loadQuestion(){clearTimer();answered=false;selectedChoice=null;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];triesLeft=s.tries;$('questionProgress').textContent=`${currentIndex+1}/${currentQuestions.length}`;$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;$('streakText').textContent=`Streak: ${streak}`;$('timerText').textContent=s.timer?'Time: 10':'';$('verseTag').textContent=q.verse;$('questionText').textContent=tournamentMode?`[${questionValue()} pts] ${q.question}`:q.question;$('triesText').textContent=`Tries Remaining: ${triesLeft}`;$('feedbackText').textContent='';$('feedbackText').className='';$('answerReveal').classList.add('hidden');$('submitBtn').classList.remove('hidden');$('nextBtn').classList.add('hidden');$('hintBtn').classList.toggle('hidden',!s.hints);$('answerInput').value='';$('answerInput').disabled=false;$('answerInput').style.display=s.multiple?'none':'block';$('multipleChoiceBox').classList.toggle('hidden',!s.multiple);if(s.multiple)renderChoices(q);else $('answerInput').focus();if(s.timer)startTimer();saveRound()}
 function renderChoices(q){const box=$('multipleChoiceBox');let pool=(BOOKS[selectedBookKey]?.questions||Object.values(BOOKS).flatMap(b=>b.questions)).filter(x=>x.answer!==q.answer).map(x=>x.answer);shuffle(pool);const choices=[q.answer,...pool.slice(0,3)];shuffle(choices);box.innerHTML=choices.map(c=>`<button class="choice" onclick="chooseAnswer(this, ${JSON.stringify(c).replace(/"/g,'&quot;')})">${c}</button>`).join('')}
 function chooseAnswer(btn,ans){selectedChoice=ans;document.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')}
-function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){score++;if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;$('streakText').textContent=`Streak: ${streak}`;$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect'}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
+function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++;if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;$('streakText').textContent=`Streak: ${streak}`;$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
 function finishQuestion(){clearTimer();answered=true;const q=currentQuestions[currentIndex];$('answerInput').disabled=true;$('submitBtn').classList.add('hidden');$('hintBtn').classList.add('hidden');$('nextBtn').classList.remove('hidden');$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;$('streakText').textContent=`Streak: ${streak}`;$('answerReveal').innerHTML=`<p><strong>Answer:</strong> ${q.answer}</p><p><strong>Verse:</strong> ${q.verse}</p>`;$('answerReveal').classList.remove('hidden');saveRound()}
 function nextQuestion(){currentIndex++;currentIndex>=currentQuestions.length?showResults():loadQuestion()}
 function showHint(){const q=currentQuestions[currentIndex];$('feedbackText').textContent=`Hint: ${q.hint||smartHint(q)}`;$('feedbackText').className=''}
 function smartHint(q){const a=String(q.answer); if(a.length<=6)return `It is ${a.length} letters long.`; return `It starts with “${a[0]}” and has ${a.split(/\s+/).length} word(s).`}
-function startTimer(){timeLeft=10;$('timerText').textContent=`Time: ${timeLeft}`;timer=setInterval(()=>{timeLeft--;$('timerText').textContent=`Time: ${timeLeft}`;if(timeLeft<=0){clearTimer();streak=0;missedQuestions.push(currentQuestions[currentIndex]);addToReviewBank(currentQuestions[currentIndex]);$('feedbackText').textContent='⏰ Time is up!';$('feedbackText').className='incorrect';finishQuestion(false)}},1000)}
+function startTimer(){timeLeft=10;$('timerText').textContent=`Time: ${timeLeft}`;timer=setInterval(()=>{timeLeft--;$('timerText').textContent=`Time: ${timeLeft}`;if(timeLeft<=3&&timeLeft>0)playTickSound();if(timeLeft<=0){clearTimer();streak=0;missedQuestions.push(currentQuestions[currentIndex]);addToReviewBank(currentQuestions[currentIndex]);$('feedbackText').textContent='⏰ Time is up!';$('feedbackText').className='incorrect';playWrongSound();finishQuestion(false)}},1000)}
 function clearTimer(){if(timer)clearInterval(timer);timer=null}
 function showResults(){clearTimer();const total=currentQuestions.length,accuracy=total?Math.round(score/total*100):0,elapsed=Math.floor((Date.now()-startTime)/1000),min=Math.floor(elapsed/60),sec=elapsed%60;saveStats(total,score);updateAchievements(total,score,accuracy);clearSavedRound();let missed=missedQuestions.length?missedQuestions.map(q=>`<div class="answer-box"><p><strong>Question:</strong> ${q.question}</p><p><strong>Answer:</strong> ${q.answer}</p><p><strong>Verse:</strong> ${q.verse}</p></div>`).join(''):'<p>No missed questions. Great job!</p>';$('resultsContent').innerHTML=`<p><strong>Book:</strong> ${currentRoundMeta.bookTitle}</p><p><strong>Set:</strong> ${selectedSetLabel}</p><p><strong>Difficulty:</strong> ${difficultySettings[selectedDifficulty].label}</p><p><strong>Score:</strong> ${score}/${total}</p>${tournamentMode?`<p><strong>Tournament Points:</strong> ${tournamentPoints}</p>`:''}<p><strong>Accuracy:</strong> ${accuracy}%</p><p><strong>Time:</strong> ${min}m ${sec}s</p><p><strong>Best Streak:</strong> ${bestStreak}</p><h3>Missed Questions</h3>${missed}`;$('retryMissedBtn').classList.toggle('hidden',missedQuestions.length===0);showScreen('resultsScreen');renderResumeNotice()}
 function retryMissed(){const missed=[...missedQuestions];selectedQuestions=missed;selectedSetLabel='Retry Missed Questions';startGame(missed)}
@@ -61,8 +203,9 @@ function clearReviewBank(){if(confirm('Clear all saved missed questions?')){loca
 function startTournamentMenu(){const sel=$('tournamentSet');sel.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>sel.innerHTML+=`<option value="${key}">${b.title}</option>`);sel.innerHTML+=`<option value="grand">Grand Championship</option>`;showScreen('tournamentScreen')}
 function beginTournament(){const set=$('tournamentSet').value;const count=Number($('tournamentCount').value);if(set==='grand'){selectedBookKey='acts';selectedQuestions=Object.values(BOOKS).flatMap(b=>b.topQuestions).slice(0);selectedSetLabel='Grand Championship Tournament'}else{selectedBookKey=set;selectedQuestions=[...(BOOKS[set].topQuestions?.length?BOOKS[set].topQuestions:BOOKS[set].questions)];selectedSetLabel=`${BOOKS[set].title} Tournament`}shuffle(selectedQuestions);selectedQuestions=selectedQuestions.slice(0,count);selectedDifficulty='medium';selectedMode='random';tournamentMode=true;currentQuestions=[...selectedQuestions];currentIndex=0;score=0;tournamentPoints=0;missedQuestions=[];streak=0;startTime=Date.now();currentRoundMeta={bookKey:selectedBookKey,bookTitle:set==='grand'?'Grand Championship':BOOKS[selectedBookKey].title,setLabel:selectedSetLabel,difficulty:selectedDifficulty,mode:selectedMode};unlock('tournament_player');saveRound();showScreen('gameScreen');loadQuestion()}
 function questionValue(){return 10+Math.floor(currentIndex/5)*10}
-function unlock(id){const ach=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');if(!ach[id]){ach[id]=Date.now();localStorage.setItem('bbpAchievements',JSON.stringify(ach))}}
+function unlock(id){const ach=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');if(!ach[id]){ach[id]=Date.now();localStorage.setItem('bbpAchievements',JSON.stringify(ach));playAchievementSound()}}
 function updateAchievements(total,correct,accuracy){if(accuracy===100){unlock('perfect_round');if(currentRoundMeta.bookTitle==='Haggai')unlock('haggai_master')}const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');if((stats['Acts']?.answered||0)>=100)unlock('acts_missionary');if((stats['Isaiah']?.answered||0)>=250)unlock('isaiah_scholar');if((stats['Proverbs']?.answered||0)>=150)unlock('proverbs_sage');if((stats['2 Samuel']?.answered||0)>=75)unlock('samuel_kingdom');const bookTitles=Object.values(BOOKS).map(b=>b.title);if(bookTitles.every(t=>(stats[t]?.played||0)>0))unlock('champion')}
 function showAchievements(){const unlocked=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');$('achievementsContent').innerHTML=ACHIEVEMENTS.map(a=>`<div class="answer-box"><p><strong>${unlocked[a.id]?'🏆':'🔒'} ${a.name}</strong></p><p>${a.desc}</p>${unlocked[a.id]?`<p class="small">Unlocked: ${new Date(unlocked[a.id]).toLocaleDateString()}</p>`:''}</div>`).join('');showScreen('achievementsScreen')}
 function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
 window.onload=init;
