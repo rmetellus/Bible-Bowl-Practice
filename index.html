@@ -90,7 +90,7 @@ Back
       <h2 id="bookInfoTitle"></h2>
       <div id="bookInfoContent" class="card scroll-card"></div>
       <button onclick="showStudyOptions()">Continue</button>
-      <button class="secondary" onclick="showScreen('bookScreen')">Back</button>
+      <button class="secondary" onclick="goBack()">Back</button>
     </section>
 
     <section id="studyOptionsScreen" class="screen">
@@ -101,14 +101,14 @@ Back
         <button onclick="chooseStudyType('range')">Chapter Range</button>
         <button id="topicBtn" onclick="chooseStudyType('topic')">Topic Practice</button>
       </div>
-      <button class="secondary" onclick="showScreen('bookInfoScreen')">Back</button>
+      <button class="secondary" onclick="goBack()">Back</button>
     </section>
 
     <section id="chapterScreen" class="screen">
       <h2 id="chapterTitle"></h2>
       <div id="chapterInputs" class="card"></div>
       <button onclick="confirmStudySelection()">Continue</button>
-      <button class="secondary" onclick="showScreen('studyOptionsScreen')">Back</button>
+      <button class="secondary" onclick="goBack()">Back</button>
     </section>
 
     <section id="difficultyScreen" class="screen">
@@ -117,14 +117,14 @@ Back
       <button onclick="selectDifficulty('easy')">🔵 Easy</button>
       <button onclick="selectDifficulty('medium')">🟡 Medium</button>
       <button onclick="selectDifficulty('hard')">🔴 Hard</button>
-      <button class="secondary" onclick="showScreen('studyOptionsScreen')">Back</button>
+      <button class="secondary" onclick="goBack()">Back</button>
     </section>
 
     <section id="modeScreen" class="screen">
       <h2>Choose Question Order</h2>
       <button onclick="selectMode('sequential')">Sequential Mode</button>
       <button onclick="selectMode('random')">Random Mode</button>
-      <button class="secondary" onclick="showScreen('difficultyScreen')">Back</button>
+      <button class="secondary" onclick="goBack()">Back</button>
     </section>
 
     <section id="readyScreen" class="screen">
@@ -137,7 +137,7 @@ Back
         <p><strong>Questions:</strong> <span id="readyCount"></span></p>
       </div>
       <button onclick="startGame()">Start</button>
-      <button class="secondary" onclick="showScreen('modeScreen')">Back</button>
+      <button class="secondary" onclick="goBack()">Back</button>
     </section>
 
     <section id="gameScreen" class="screen">
