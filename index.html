@@ -7,10 +7,37 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
-<section id="mainMenu" class="screen active">
+<main class="app">
 
-    <section id="rulesScreen" class="screen">
+<section id="mainMenu" class="screen active">
+  <div class="title-card">
+    <p class="eyebrow">KJV Bible Study Game</p>
+    <h1>Bible Bowl Practice</h1>
+    <p class="subtitle">Practice by book, chapter, range, Top 100, memory verses, and difficulty.</p>
+  </div>
+
+  <button onclick="showScreen('playMenuScreen')">Play</button>
+  <button class="secondary" onclick="showAchievements()">Achievements</button>
+  <button class="secondary" onclick="showScreen('statsScreen'); renderStats()">Statistics</button>
+  <button class="secondary" onclick="showSettings()">⚙️ Settings</button>
+
+  <p class="footer-note">All questions and answers are based on the King James Version.</p>
+</section>
+
+<section id="playMenuScreen" class="screen">
+  <h2>Choose Game Mode</h2>
+
+  <button onclick="showScreen('bookScreen')">📖 Book Practice</button>
+  <button onclick="startTopMenu()">🔥 Top 100 Mode</button>
+  <button onclick="startMemoryMenu()">🧠 Memory Verse Mode</button>
+  <button onclick="startSmartReview()">🎯 Smart Review</button>
+  <button onclick="startTournamentMenu()">🏆 Tournament Mode</button>
+  <button onclick="showScreen('rulesScreen')">📜 Rules</button>
+
+  <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+</section>
+
+<section id="rulesScreen" class="screen">
       <h2>Rules</h2>
       <div class="card scroll-card">
         <h3>🟢 Very Easy</h3><p>Multiple choice, 3 tries, hints allowed, no timer.</p>
