@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bible Bowl Practice</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section id="mainMenu" class="screen active">
+      <div class="title-card">
+        <p class="eyebrow">KJV Bible Study Game</p>
+        <h1>Bible Bowl Practice</h1>
+        <p class="subtitle">Practice by book, chapter, range, Top 100, memory verses, and difficulty.</p>
+      </div>
+      <button onclick="showScreen('bookScreen')">Play</button>
+      <button onclick="startTopMenu()">Top 100 Mode</button>
+      <button onclick="startMemoryMenu()">Memory Verse Mode</button>
+      <button onclick="startSmartReview()">Smart Review</button>
+      <button onclick="startTournamentMenu()">Tournament Mode</button>
+      <button class="secondary" onclick="showAchievements()">Achievements</button>
+      <button class="secondary" onclick="showScreen('statsScreen'); renderStats()">Statistics</button>
+      <button class="secondary" onclick="showScreen('rulesScreen')">Rules</button>
+      <p class="footer-note">All questions and answers are based on the King James Version.</p>
+    </section>
+
+    <section id="rulesScreen" class="screen">
+      <h2>Rules</h2>
+      <div class="card scroll-card">
+        <h3>🟢 Very Easy</h3><p>Multiple choice, 3 tries, hints allowed, no timer.</p>
+        <h3>🔵 Easy</h3><p>Typed answers, 3 tries, hints allowed, close spelling accepted, no timer.</p>
+        <h3>🟡 Medium</h3><p>Typed answers, 2 tries, no hints, close spelling accepted, no timer.</p>
+        <h3>🔴 Hard</h3><p>Typed answers, 1 try, no hints, exact spelling required, 10 seconds per question.</p>
+        <h3>Study Options</h3><p>Practice an entire book, one chapter, chapter range, Top 100, memory verses, or Proverbs topic mode.</p>
+      </div>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="bookScreen" class="screen">
+      <h2>Choose a Book</h2>
+      <div id="bookButtons" class="grid"></div>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="bookInfoScreen" class="screen">
+      <h2 id="bookInfoTitle"></h2>
+      <div id="bookInfoContent" class="card scroll-card"></div>
+      <button onclick="showStudyOptions()">Continue</button>
+      <button class="secondary" onclick="showScreen('bookScreen')">Back</button>
+    </section>
+
+    <section id="studyOptionsScreen" class="screen">
+      <h2>How do you want to study?</h2>
+      <div class="grid">
+        <button onclick="chooseStudyType('entire')">Entire Book</button>
+        <button onclick="chooseStudyType('chapter')">Specific Chapter</button>
+        <button onclick="chooseStudyType('range')">Chapter Range</button>
+        <button id="topicBtn" onclick="chooseStudyType('topic')">Topic Practice</button>
+      </div>
+      <button class="secondary" onclick="showScreen('bookInfoScreen')">Back</button>
+    </section>
+
+    <section id="chapterScreen" class="screen">
+      <h2 id="chapterTitle"></h2>
+      <div id="chapterInputs" class="card"></div>
+      <button onclick="confirmStudySelection()">Continue</button>
+      <button class="secondary" onclick="showScreen('studyOptionsScreen')">Back</button>
+    </section>
+
+    <section id="difficultyScreen" class="screen">
+      <h2>Choose Difficulty</h2>
+      <button onclick="selectDifficulty('veryEasy')">🟢 Very Easy</button>
+      <button onclick="selectDifficulty('easy')">🔵 Easy</button>
+      <button onclick="selectDifficulty('medium')">🟡 Medium</button>
+      <button onclick="selectDifficulty('hard')">🔴 Hard</button>
+      <button class="secondary" onclick="showScreen('studyOptionsScreen')">Back</button>
+    </section>
+
+    <section id="modeScreen" class="screen">
+      <h2>Choose Question Order</h2>
+      <button onclick="selectMode('sequential')">Sequential Mode</button>
+      <button onclick="selectMode('random')">Random Mode</button>
+      <button class="secondary" onclick="showScreen('difficultyScreen')">Back</button>
+    </section>
+
+    <section id="readyScreen" class="screen">
+      <h2>Ready?</h2>
+      <div class="card">
+        <p><strong>Book:</strong> <span id="readyBook"></span></p>
+        <p><strong>Set:</strong> <span id="readySet"></span></p>
+        <p><strong>Difficulty:</strong> <span id="readyDifficulty"></span></p>
+        <p><strong>Order:</strong> <span id="readyMode"></span></p>
+        <p><strong>Questions:</strong> <span id="readyCount"></span></p>
+      </div>
+      <button onclick="startGame()">Start</button>
+      <button class="secondary" onclick="showScreen('modeScreen')">Back</button>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <div class="top-bar"><span id="questionProgress"></span><span id="streakText"></span><span id="scoreText"></span><span id="timerText"></span></div>
+      <div class="card question-card">
+        <p id="verseTag" class="eyebrow"></p>
+        <h2 id="questionText"></h2>
+        <div id="multipleChoiceBox" class="choice-box hidden"></div>
+        <input id="answerInput" type="text" placeholder="Type your answer..." autocomplete="off" />
+        <p id="triesText"></p>
+        <p id="feedbackText"></p>
+        <div id="answerReveal" class="answer-box hidden"></div>
+      </div>
+      <button id="submitBtn" onclick="submitAnswer()">Submit</button>
+      <button id="hintBtn" class="secondary" onclick="showHint()">Hint</button>
+      <button id="nextBtn" class="hidden" onclick="nextQuestion()">Next Question</button>
+      <button class="danger" onclick="confirmExit()">Exit</button>
+    </section>
+
+    <section id="resultsScreen" class="screen">
+      <h2>Bible Bowl Complete</h2>
+      <div id="resultsContent" class="card scroll-card"></div>
+      <button id="retryMissedBtn" onclick="retryMissed()">Retry Missed Questions</button>
+      <button onclick="restartSameSetup()">Play Again</button>
+      <button class="secondary" onclick="showScreen('mainMenu')">Main Menu</button>
+    </section>
+
+    <section id="topMenuScreen" class="screen">
+      <h2>Top Questions</h2>
+      <div id="topButtons" class="grid"></div>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="memoryMenuScreen" class="screen">
+      <h2>Memory Verse Mode</h2>
+      <div id="memoryButtons" class="grid"></div>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+
+    <section id="smartReviewScreen" class="screen">
+      <h2>Smart Review</h2>
+      <div id="reviewContent" class="card scroll-card"></div>
+      <button id="startReviewBtn" onclick="beginSmartReview()">Start Review</button>
+      <button class="danger" onclick="clearReviewBank()">Clear Review Bank</button>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="tournamentScreen" class="screen">
+      <h2>Tournament Mode</h2>
+      <div class="card">
+        <p>Competition-style scoring. Questions become worth more as the round goes on.</p>
+        <label>Choose Tournament Set</label>
+        <select id="tournamentSet"></select>
+        <label>Number of Questions</label>
+        <select id="tournamentCount"><option>10</option><option selected>20</option><option>30</option><option>50</option></select>
+      </div>
+      <button onclick="beginTournament()">Start Tournament</button>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="achievementsScreen" class="screen">
+      <h2>Achievements</h2>
+      <div id="achievementsContent" class="card scroll-card"></div>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="statsScreen" class="screen">
+      <h2>Statistics</h2>
+      <div id="statsContent" class="card scroll-card"></div>
+      <button class="danger" onclick="resetStats()">Reset Stats</button>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+  </main>
+  <script src="questions/books-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
