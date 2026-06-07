@@ -9,13 +9,35 @@
 <body>
   <main class="app">
     <section id="mainMenu" class="screen active">
+  ...
+</section>
 
+<section id="playMenuScreen" class="screen">
+  ...
+</section>
+    
 <section id="playMenuScreen" class="screen">
 
   <h2>Choose Game Mode</h2>
 
   <button onclick="showScreen('bookScreen')">
     📖 Book Practice
+  </button>
+
+  <button onclick="startTopMenu()">
+    🔥 Top 100 Mode
+  </button>
+
+  <button onclick="startMemoryMenu()">
+    🧠 Memory Verse Mode
+  </button>
+
+  <button onclick="startSmartReview()">
+    🎯 Smart Review
+  </button>
+
+  <button onclick="startTournamentMenu()">
+    🏆 Tournament Mode
   </button>
 
   <button onclick="showScreen('rulesScreen')">
@@ -34,15 +56,9 @@
         <h1>Bible Bowl Practice</h1>
         <p class="subtitle">Practice by book, chapter, range, Top 100, memory verses, and difficulty.</p>
       </div>
-      <button onclick="showScreen('playMenuScreen')">   Play </button>
-      <button onclick="startTopMenu()">Top 100 Mode</button>
-      <button onclick="startMemoryMenu()">Memory Verse Mode</button>
-      <button onclick="startSmartReview()">Smart Review</button>
-      <button onclick="startTournamentMenu()">Tournament Mode</button>
       <button class="secondary" onclick="showAchievements()">Achievements</button>
       <button class="secondary" onclick="showScreen('statsScreen'); renderStats()">Statistics</button>
       <button class="secondary" onclick="showSettings()">⚙️ Settings</button>
-      <button class="secondary" onclick="showScreen('rulesScreen')">Rules</button>
       <p class="footer-note">All questions and answers are based on the King James Version.</p>
     </section>
 
@@ -216,14 +232,6 @@
       <button class="danger" onclick="resetStats()">Reset Stats</button>
       <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
     </section>
-
-<div id="achievementPopup" class="achievement-popup hidden">
-  <div class="achievement-popup-content">
-    <h3>🏆 Achievement Unlocked!</h3>
-    <p id="achievementPopupName"></p>
-    <small id="achievementPopupDesc"></small>
-  </div>
-</div>
 
 <div id="achievementPopup" class="achievement-popup hidden">
   <div class="achievement-popup-content">
