@@ -46,7 +46,10 @@
         <h3>🔴 Hard</h3><p>Typed answers, 1 try, no hints, exact spelling required, 10 seconds per question.</p>
         <h3>Study Options</h3><p>Practice an entire book, one chapter, chapter range, Top 100, memory verses, or Proverbs topic mode.</p>
       </div>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary"
+onclick="goBack()">
+Back
+</button>
     </section>
 
 <section id="settingsScreen" class="screen">
@@ -74,13 +77,13 @@
     <p class="footer-note">Music starts after your first click because browsers block autoplay.</p>
   </div>
 
-  <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+  <button class="secondary" onclick="goBack()"> Back </button>
 </section>
 
     <section id="bookScreen" class="screen">
       <h2>Choose a Book</h2>
       <div id="bookButtons" class="grid"></div>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
     <section id="bookInfoScreen" class="screen">
@@ -165,13 +168,13 @@
     <section id="topMenuScreen" class="screen">
       <h2>Top Questions</h2>
       <div id="topButtons" class="grid"></div>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
     <section id="memoryMenuScreen" class="screen">
       <h2>Memory Verse Mode</h2>
       <div id="memoryButtons" class="grid"></div>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
     <section id="smartReviewScreen" class="screen">
@@ -179,7 +182,7 @@
       <div id="reviewContent" class="card scroll-card"></div>
       <button id="startReviewBtn" onclick="beginSmartReview()">Start Review</button>
       <button class="danger" onclick="clearReviewBank()">Clear Review Bank</button>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
     <section id="tournamentScreen" class="screen">
@@ -192,20 +195,20 @@
         <select id="tournamentCount"><option>10</option><option selected>20</option><option>30</option><option>50</option></select>
       </div>
       <button onclick="beginTournament()">Start Tournament</button>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
     <section id="achievementsScreen" class="screen">
       <h2>Achievements</h2>
       <div id="achievementsContent" class="card scroll-card"></div>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
     <section id="statsScreen" class="screen">
       <h2>Statistics</h2>
       <div id="statsContent" class="card scroll-card"></div>
       <button class="danger" onclick="resetStats()">Reset Stats</button>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+      <button class="secondary" onclick="goBack()"> Back </button>
     </section>
 
 <div id="achievementPopup" class="achievement-popup hidden">
