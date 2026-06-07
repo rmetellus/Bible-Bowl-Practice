@@ -21,6 +21,7 @@
       <button onclick="startTournamentMenu()">Tournament Mode</button>
       <button class="secondary" onclick="showAchievements()">Achievements</button>
       <button class="secondary" onclick="showScreen('statsScreen'); renderStats()">Statistics</button>
+      <button class="secondary" onclick="showSettings()">⚙️ Settings</button>
       <button class="secondary" onclick="showScreen('rulesScreen')">Rules</button>
       <p class="footer-note">All questions and answers are based on the King James Version.</p>
     </section>
@@ -33,6 +34,34 @@
         <h3>🟡 Medium</h3><p>Typed answers, 2 tries, no hints, close spelling accepted, no timer.</p>
         <h3>🔴 Hard</h3><p>Typed answers, 1 try, no hints, exact spelling required, 10 seconds per question.</p>
         <h3>Study Options</h3><p>Practice an entire book, one chapter, chapter range, Top 100, memory verses, or Proverbs topic mode.</p>
+      </div>
+      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+    </section>
+
+    <section id="settingsScreen" class="screen">
+      <h2>⚙️ Settings</h2>
+      <div class="card scroll-card">
+        <label>
+          <input type="checkbox" id="musicToggle" checked>
+          Enable Background Music
+        </label>
+
+        <label>
+          Music Volume
+          <input type="range" id="volumeSlider" min="0" max="100" value="50">
+        </label>
+
+        <label>
+          <input type="checkbox" id="quizMusicToggle" checked>
+          Play Music During Quiz
+        </label>
+
+        <label>
+          <input type="checkbox" id="soundToggle" checked>
+          Enable Sound Effects
+        </label>
+
+        <p class="footer-note">Music starts after your first click because browsers block autoplay.</p>
       </div>
       <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
     </section>
@@ -134,7 +163,6 @@
       <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
     </section>
 
-
     <section id="smartReviewScreen" class="screen">
       <h2>Smart Review</h2>
       <div id="reviewContent" class="card scroll-card"></div>
@@ -169,6 +197,11 @@
       <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
     </section>
   </main>
+
+  <audio id="bgMusic" loop>
+    <source src="audio/menu-theme.mp3" type="audio/mpeg">
+  </audio>
+
   <script src="questions/books-data.js"></script>
   <script src="script.js"></script>
 </body>
