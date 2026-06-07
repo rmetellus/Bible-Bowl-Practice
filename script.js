@@ -284,31 +284,33 @@ function startTournamentMenu(){const sel=$('tournamentSet');sel.innerHTML='';Obj
 function beginTournament(){const set=$('tournamentSet').value;const count=Number($('tournamentCount').value);if(set==='grand'){selectedBookKey='acts';selectedQuestions=Object.values(BOOKS).flatMap(b=>b.topQuestions).slice(0);selectedSetLabel='Grand Championship Tournament'}else{selectedBookKey=set;selectedQuestions=[...(BOOKS[set].topQuestions?.length?BOOKS[set].topQuestions:BOOKS[set].questions)];selectedSetLabel=`${BOOKS[set].title} Tournament`}shuffle(selectedQuestions);selectedQuestions=selectedQuestions.slice(0,count);selectedDifficulty='medium';selectedMode='random';tournamentMode=true;currentQuestions=[...selectedQuestions];currentIndex=0;score=0;tournamentPoints=0;missedQuestions=[];streak=0;startTime=Date.now();currentRoundMeta={bookKey:selectedBookKey,bookTitle:set==='grand'?'Grand Championship':BOOKS[selectedBookKey].title,setLabel:selectedSetLabel,difficulty:selectedDifficulty,mode:selectedMode};unlock('tournament_player');saveRound();showScreen('gameScreen');loadQuestion()}
 function questionValue(){return 10+Math.floor(currentIndex/5)*10}
 function unlock(id){
-
-  const ach = JSON.parse(
-    localStorage.getItem('bbpAchievements') || '{}'
-  );
+  const ach = JSON.parse(localStorage.getItem('bbpAchievements') || '{}');
 
   if(!ach[id]){
-
     ach[id] = Date.now();
-
-    localStorage.setItem(
-      'bbpAchievements',
-      JSON.stringify(ach)
-    );
+    localStorage.setItem('bbpAchievements', JSON.stringify(ach));
 
     playAchievementSound();
 
-    const achievement =
-      ACHIEVEMENTS.find(a => a.id === id);
-
+    const achievement = ACHIEVEMENTS.find(a => a.id === id);
     if(achievement){
       showAchievementPopup(achievement);
     }
-
   }
+}
 
+function showAchievementPopup(achievement){
+  const popup = $('achievementPopup');
+  if(!popup) return;
+
+  $('achievementPopupName').textContent = achievement.name;
+  $('achievementPopupDesc').textContent = achievement.desc;
+
+  popup.classList.remove('hidden');
+
+  setTimeout(()=>{
+    popup.classList.add('hidden');
+  },4000);
 }
 
 function showAchievementPopup(achievement){
