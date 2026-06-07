@@ -29,3 +29,26 @@ small{font-size:.8rem;font-weight:700;opacity:.85}.answer-box p{margin:6px 0}#re
     opacity:1;
   }
 }
+
+.achievement-popup{
+  position:fixed;
+  top:20px;
+  right:20px;
+  z-index:9999;
+  animation:slideIn .5s ease;
+}
+
+.achievement-popup-content{
+  background:#1f2937;
+  color:white;
+  padding:16px;
+  border-radius:12px;
+  border:2px solid gold;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);
+  min-width:250px;
+}
+
+@keyframes slideIn{
+  from{transform:translateX(300px);opacity:0;}
+  to{transform:translateX(0);opacity:1;}
+}
