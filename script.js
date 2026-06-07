@@ -293,7 +293,40 @@ function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.ra
 function startTopMenu(){const box=$('topButtons');box.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>{const btn=document.createElement('button');btn.textContent=`${b.title} Top ${b.topQuestions.length}`;btn.onclick=()=>{selectedBookKey=key;selectedQuestions=[...b.topQuestions];selectedSetLabel=`Top ${b.topQuestions.length}`;showScreen('difficultyScreen')};box.appendChild(btn)});const grand=document.createElement('button');grand.textContent='Grand Championship 100';grand.onclick=()=>{selectedBookKey='acts';selectedQuestions=[];Object.values(BOOKS).forEach(b=>selectedQuestions.push(...b.topQuestions.slice(0,Math.ceil(100/Object.keys(BOOKS).length))));shuffle(selectedQuestions);selectedQuestions=selectedQuestions.slice(0,100);selectedSetLabel='Grand Championship 100';showScreen('difficultyScreen')};box.appendChild(grand);showScreen('topMenuScreen')}
 function startMemoryMenu(){const box=$('memoryButtons');box.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>{const btn=document.createElement('button');btn.textContent=`${b.title} Memory Verses`;btn.onclick=()=>{selectedBookKey=key;let mem=b.memoryVerses||[];selectedQuestions=b.questions.filter(q=>mem.some(v=>q.verse.startsWith(v.split('-')[0])));if(!selectedQuestions.length)selectedQuestions=b.topQuestions.slice(0,20);selectedSetLabel='Memory Verse Mode';showScreen('difficultyScreen')};box.appendChild(btn)});showScreen('memoryMenuScreen')}
 function saveStats(total,correct){const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');const key=currentRoundMeta.bookTitle||BOOKS[selectedBookKey]?.title||selectedBookKey;stats[key]=stats[key]||{played:0,answered:0,correct:0,best:0};stats[key].played++;stats[key].answered+=total;stats[key].correct+=correct;stats[key].best=Math.max(stats[key].best,correct);localStorage.setItem('bbpStats',JSON.stringify(stats))}
-function renderStats(){const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');let html=` <p><strong>Level:</strong> ${level}</p> <p><strong>Rank:</strong> ${getRank()}</p> <p><strong>XP:</strong> ${xp}</p> <p><strong>Best Streak:</strong> ${localStorage.getItem('bbpBestStreak')||0}</p> `; ${localStorage.getItem('bbpBestStreak')||0}</p>`;if(!Object.keys(stats).length)html+='<p>No rounds played yet.</p>';else html+=Object.entries(stats).map(([book,s])=>`<div class="answer-box"><p><strong>${book}</strong></p><p>Rounds: ${s.played}</p><p>Answered: ${s.answered}</p><p>Accuracy: ${s.answered?Math.round(s.correct/s.answered*100):0}%</p><p>Best Score: ${s.best}</p></div>`).join('');$('statsContent').innerHTML=html}
+function renderStats(){
+
+  const stats = JSON.parse(
+    localStorage.getItem('bbpStats') || '{}'
+  );
+
+  let html = `
+    <p><strong>Level:</strong> ${level}</p>
+    <p><strong>Rank:</strong> ${getRank()}</p>
+    <p><strong>XP:</strong> ${xp}</p>
+    <p><strong>Best Streak:</strong> ${localStorage.getItem('bbpBestStreak') || 0}</p>
+  `;
+
+  if(!Object.keys(stats).length){
+
+    html += '<p>No rounds played yet.</p>';
+
+  }else{
+
+    html += Object.entries(stats).map(([book,s]) => `
+      <div class="answer-box">
+        <p><strong>${book}</strong></p>
+        <p>Rounds: ${s.played}</p>
+        <p>Answered: ${s.answered}</p>
+        <p>Accuracy: ${s.answered ? Math.round(s.correct / s.answered * 100) : 0}%</p>
+        <p>Best Score: ${s.best}</p>
+      </div>
+    `).join('');
+
+  }
+
+  $('statsContent').innerHTML = html;
+
+}
 function resetStats(){if(confirm('Reset all saved stats and achievements?')){['bbpStats','bbpBestStreak','bbpAchievements','bbpReviewBank','bbpSavedRound'].forEach(k=>localStorage.removeItem(k));bestStreak=0;renderStats();renderResumeNotice()}}
 function saveRound(){if(!currentQuestions.length||answered&&currentIndex>=currentQuestions.length)return;localStorage.setItem('bbpSavedRound',JSON.stringify({selectedBookKey,selectedDifficulty,selectedMode,selectedSetLabel,currentQuestions,currentIndex,score,missedQuestions,streak,bestStreak,startTime,currentRoundMeta,tournamentMode,tournamentPoints,bookTitle:currentRoundMeta.bookTitle||BOOKS[selectedBookKey]?.title||'Mixed'}))}
 function loadSavedRound(){try{return JSON.parse(localStorage.getItem('bbpSavedRound')||'null')}catch{return null}}
@@ -389,7 +422,53 @@ function showAchievementPopup(achievement){
   },4000);
 }
 
-function updateAchievements(total,correct,accuracy){if(accuracy===100){    addXP(100);    unlock('perfect_round');    if(currentRoundMeta.bookTitle==='Haggai'){     unlock('haggai_master');   }  }unlock('perfect_round');if(currentRoundMeta.bookTitle==='Haggai')unlock('haggai_master')}const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');if((stats['Acts']?.answered||0)>=100)unlock('acts_missionary');if((stats['Isaiah']?.answered||0)>=250)unlock('isaiah_scholar');if((stats['Proverbs']?.answered||0)>=150)unlock('proverbs_sage');if((stats['2 Samuel']?.answered||0)>=75)unlock('samuel_kingdom');const bookTitles=Object.values(BOOKS).map(b=>b.title);if(bookTitles.every(t=>(stats[t]?.played||0)>0))unlock('champion')}
+function updateAchievements(total,correct,accuracy){
+
+  if(accuracy===100){
+
+    addXP(100);
+
+    unlock('perfect_round');
+
+    if(currentRoundMeta.bookTitle==='Haggai'){
+      unlock('haggai_master');
+    }
+
+  }
+
+  const stats = JSON.parse(
+    localStorage.getItem('bbpStats') || '{}'
+  );
+
+  if((stats['Acts']?.answered || 0) >= 100){
+    unlock('acts_missionary');
+  }
+
+  if((stats['Isaiah']?.answered || 0) >= 250){
+    unlock('isaiah_scholar');
+  }
+
+  if((stats['Proverbs']?.answered || 0) >= 150){
+    unlock('proverbs_sage');
+  }
+
+  if((stats['2 Samuel']?.answered || 0) >= 75){
+    unlock('samuel_kingdom');
+  }
+
+  const bookTitles = Object.values(BOOKS).map(
+    b => b.title
+  );
+
+  if(
+    bookTitles.every(
+      t => (stats[t]?.played || 0) > 0
+    )
+  ){
+    unlock('champion');
+  }
+
+}
 function showAchievements(){const unlocked=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');$('achievementsContent').innerHTML=ACHIEVEMENTS.map(a=>`<div class="answer-box"><p><strong>${unlocked[a.id]?'🏆':'🔒'} ${a.name}</strong></p><p>${a.desc}</p>${unlocked[a.id]?`<p class="small">Unlocked: ${new Date(unlocked[a.id]).toLocaleDateString()}</p>`:''}</div>`).join('');showScreen('achievementsScreen')}
 function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)
 }
