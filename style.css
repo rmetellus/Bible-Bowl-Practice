@@ -91,3 +91,32 @@ small{font-size:.8rem;font-weight:700;opacity:.85}
   h2{font-size:1.55rem}
   .achievement-popup{top:12px;width:94vw}
 }
+
+.streak-normal{
+  color:#ffffff;
+}
+
+.streak-fire{
+  color:#ffdd57;
+  animation:streakPulse .6s ease infinite alternate;
+}
+
+.streak-hot{
+  color:#ff8c00;
+  animation:streakPulse .45s ease infinite alternate;
+}
+
+.streak-unstoppable{
+  color:#ff3b3b;
+  animation:streakShake .35s ease infinite alternate;
+}
+
+@keyframes streakPulse{
+  from{transform:scale(1);}
+  to{transform:scale(1.08);}
+}
+
+@keyframes streakShake{
+  from{transform:translateX(-2px) scale(1.05);}
+  to{transform:translateX(2px) scale(1.12);}
+}
