@@ -1,6 +1,6 @@
 let selectedBookKey=null,selectedDifficulty=null,selectedMode=null,selectedStudyType='entire',selectedQuestions=[],selectedSetLabel='Entire Book';
 let currentQuestions=[],currentIndex=0,score=0,triesLeft=0,missedQuestions=[],answered=false,timer=null,timeLeft=10,startTime=null,streak=0,bestStreak=0,selectedChoice=null;
-let currentRoundMeta={}, tournamentMode=false, tournamentPoints=0, reviewQuestions=[];
+let currentRoundMeta={}, tournamentMode=false, tournamentPoints=0, reviewQuestions=[];  let xp = Number(localStorage.getItem('bbpXP') || 0); let level = Number(localStorage.getItem('bbpLevel') || 1);
 
 let bgMusic=null;
 let audioStarted=false;
@@ -275,7 +275,7 @@ function updateStreakDisplay(){
 function loadQuestion(){clearTimer();answered=false;selectedChoice=null;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];triesLeft=s.tries;$('questionProgress').textContent=`${currentIndex+1}/${currentQuestions.length}`;$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;updateStreakDisplay();$('timerText').textContent=s.timer?'Time: 10':'';$('verseTag').textContent=q.verse;$('questionText').textContent=tournamentMode?`[${questionValue()} pts] ${q.question}`:q.question;$('triesText').textContent=`Tries Remaining: ${triesLeft}`;$('feedbackText').textContent='';$('feedbackText').className='';$('answerReveal').classList.add('hidden');$('submitBtn').classList.remove('hidden');$('nextBtn').classList.add('hidden');$('hintBtn').classList.toggle('hidden',!s.hints);$('answerInput').value='';$('answerInput').disabled=false;$('answerInput').style.display=s.multiple?'none':'block';$('multipleChoiceBox').classList.toggle('hidden',!s.multiple);if(s.multiple)renderChoices(q);else $('answerInput').focus();if(s.timer)startTimer();saveRound()}
 function renderChoices(q){const box=$('multipleChoiceBox');let pool=(BOOKS[selectedBookKey]?.questions||Object.values(BOOKS).flatMap(b=>b.questions)).filter(x=>x.answer!==q.answer).map(x=>x.answer);shuffle(pool);const choices=[q.answer,...pool.slice(0,3)];shuffle(choices);box.innerHTML=choices.map(c=>`<button class="choice" onclick="chooseAnswer(this, ${JSON.stringify(c).replace(/"/g,'&quot;')})">${c}</button>`).join('')}
 function chooseAnswer(btn,ans){selectedChoice=ans;document.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')}
-function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++;if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');  if(streak===5 || streak===10 || streak===20){   playAchievementSound(); }$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;updateStreakDisplay();$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
+function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++; addXP(10); if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');  if(streak===5 || streak===10 || streak===20){   playAchievementSound(); }$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;updateStreakDisplay();$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
 function finishQuestion(){clearTimer();answered=true;const q=currentQuestions[currentIndex];$('answerInput').disabled=true;$('submitBtn').classList.add('hidden');$('hintBtn').classList.add('hidden');$('nextBtn').classList.remove('hidden');$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;updateStreakDisplay();$('answerReveal').innerHTML=`<p><strong>Answer:</strong> ${q.answer}</p><p><strong>Verse:</strong> ${q.verse}</p>`;$('answerReveal').classList.remove('hidden');saveRound()}
 function nextQuestion(){currentIndex++;currentIndex>=currentQuestions.length?showResults():loadQuestion()}
 function showHint(){const q=currentQuestions[currentIndex];$('feedbackText').textContent=`Hint: ${q.hint||smartHint(q)}`;$('feedbackText').className=''}
@@ -293,7 +293,7 @@ function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.ra
 function startTopMenu(){const box=$('topButtons');box.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>{const btn=document.createElement('button');btn.textContent=`${b.title} Top ${b.topQuestions.length}`;btn.onclick=()=>{selectedBookKey=key;selectedQuestions=[...b.topQuestions];selectedSetLabel=`Top ${b.topQuestions.length}`;showScreen('difficultyScreen')};box.appendChild(btn)});const grand=document.createElement('button');grand.textContent='Grand Championship 100';grand.onclick=()=>{selectedBookKey='acts';selectedQuestions=[];Object.values(BOOKS).forEach(b=>selectedQuestions.push(...b.topQuestions.slice(0,Math.ceil(100/Object.keys(BOOKS).length))));shuffle(selectedQuestions);selectedQuestions=selectedQuestions.slice(0,100);selectedSetLabel='Grand Championship 100';showScreen('difficultyScreen')};box.appendChild(grand);showScreen('topMenuScreen')}
 function startMemoryMenu(){const box=$('memoryButtons');box.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>{const btn=document.createElement('button');btn.textContent=`${b.title} Memory Verses`;btn.onclick=()=>{selectedBookKey=key;let mem=b.memoryVerses||[];selectedQuestions=b.questions.filter(q=>mem.some(v=>q.verse.startsWith(v.split('-')[0])));if(!selectedQuestions.length)selectedQuestions=b.topQuestions.slice(0,20);selectedSetLabel='Memory Verse Mode';showScreen('difficultyScreen')};box.appendChild(btn)});showScreen('memoryMenuScreen')}
 function saveStats(total,correct){const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');const key=currentRoundMeta.bookTitle||BOOKS[selectedBookKey]?.title||selectedBookKey;stats[key]=stats[key]||{played:0,answered:0,correct:0,best:0};stats[key].played++;stats[key].answered+=total;stats[key].correct+=correct;stats[key].best=Math.max(stats[key].best,correct);localStorage.setItem('bbpStats',JSON.stringify(stats))}
-function renderStats(){const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');let html=`<p><strong>Best Streak:</strong> ${localStorage.getItem('bbpBestStreak')||0}</p>`;if(!Object.keys(stats).length)html+='<p>No rounds played yet.</p>';else html+=Object.entries(stats).map(([book,s])=>`<div class="answer-box"><p><strong>${book}</strong></p><p>Rounds: ${s.played}</p><p>Answered: ${s.answered}</p><p>Accuracy: ${s.answered?Math.round(s.correct/s.answered*100):0}%</p><p>Best Score: ${s.best}</p></div>`).join('');$('statsContent').innerHTML=html}
+function renderStats(){const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');let html=` <p><strong>Level:</strong> ${level}</p> <p><strong>Rank:</strong> ${getRank()}</p> <p><strong>XP:</strong> ${xp}</p> <p><strong>Best Streak:</strong> ${localStorage.getItem('bbpBestStreak')||0}</p> `; ${localStorage.getItem('bbpBestStreak')||0}</p>`;if(!Object.keys(stats).length)html+='<p>No rounds played yet.</p>';else html+=Object.entries(stats).map(([book,s])=>`<div class="answer-box"><p><strong>${book}</strong></p><p>Rounds: ${s.played}</p><p>Answered: ${s.answered}</p><p>Accuracy: ${s.answered?Math.round(s.correct/s.answered*100):0}%</p><p>Best Score: ${s.best}</p></div>`).join('');$('statsContent').innerHTML=html}
 function resetStats(){if(confirm('Reset all saved stats and achievements?')){['bbpStats','bbpBestStreak','bbpAchievements','bbpReviewBank','bbpSavedRound'].forEach(k=>localStorage.removeItem(k));bestStreak=0;renderStats();renderResumeNotice()}}
 function saveRound(){if(!currentQuestions.length||answered&&currentIndex>=currentQuestions.length)return;localStorage.setItem('bbpSavedRound',JSON.stringify({selectedBookKey,selectedDifficulty,selectedMode,selectedSetLabel,currentQuestions,currentIndex,score,missedQuestions,streak,bestStreak,startTime,currentRoundMeta,tournamentMode,tournamentPoints,bookTitle:currentRoundMeta.bookTitle||BOOKS[selectedBookKey]?.title||'Mixed'}))}
 function loadSavedRound(){try{return JSON.parse(localStorage.getItem('bbpSavedRound')||'null')}catch{return null}}
@@ -306,6 +306,59 @@ function clearReviewBank(){if(confirm('Clear all saved missed questions?')){loca
 function startTournamentMenu(){const sel=$('tournamentSet');sel.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>sel.innerHTML+=`<option value="${key}">${b.title}</option>`);sel.innerHTML+=`<option value="grand">Grand Championship</option>`;showScreen('tournamentScreen')}
 function beginTournament(){const set=$('tournamentSet').value;const count=Number($('tournamentCount').value);if(set==='grand'){selectedBookKey='acts';selectedQuestions=Object.values(BOOKS).flatMap(b=>b.topQuestions).slice(0);selectedSetLabel='Grand Championship Tournament'}else{selectedBookKey=set;selectedQuestions=[...(BOOKS[set].topQuestions?.length?BOOKS[set].topQuestions:BOOKS[set].questions)];selectedSetLabel=`${BOOKS[set].title} Tournament`}shuffle(selectedQuestions);selectedQuestions=selectedQuestions.slice(0,count);selectedDifficulty='medium';selectedMode='random';tournamentMode=true;currentQuestions=[...selectedQuestions];currentIndex=0;score=0;tournamentPoints=0;missedQuestions=[];streak=0;startTime=Date.now();currentRoundMeta={bookKey:selectedBookKey,bookTitle:set==='grand'?'Grand Championship':BOOKS[selectedBookKey].title,setLabel:selectedSetLabel,difficulty:selectedDifficulty,mode:selectedMode};unlock('tournament_player');saveRound();showScreen('gameScreen');loadQuestion()}
 function questionValue(){return 10+Math.floor(currentIndex/5)*10}
+
+function addXP(amount){
+
+  xp += amount;
+
+  const newLevel = Math.floor(xp / 100) + 1;
+
+  if(newLevel > level){
+
+    level = newLevel;
+
+    localStorage.setItem('bbpLevel', level);
+
+    showLevelUpPopup();
+
+  }
+
+  localStorage.setItem('bbpXP', xp);
+
+}
+
+function getRank(){
+
+  if(level >= 50) return '🏆 Hall of Faith';
+  if(level >= 30) return '👑 Bible Bowl Champion';
+  if(level >= 20) return '📜 Elder';
+  if(level >= 10) return '🎓 Scholar';
+  if(level >= 5) return '📖 Student';
+
+  return '🌱 Beginner';
+
+}
+
+function showLevelUpPopup(){
+
+  const popup = $('achievementPopup');
+
+  if(!popup) return;
+
+  $('achievementPopupName').textContent =
+    `Level ${level}`;
+
+  $('achievementPopupDesc').textContent =
+    getRank();
+
+  popup.classList.remove('hidden');
+
+  setTimeout(()=>{
+    popup.classList.add('hidden');
+  },5000);
+
+}
+
 function unlock(id){
   const ach = JSON.parse(localStorage.getItem('bbpAchievements') || '{}');
 
@@ -336,7 +389,7 @@ function showAchievementPopup(achievement){
   },4000);
 }
 
-function updateAchievements(total,correct,accuracy){if(accuracy===100){unlock('perfect_round');if(currentRoundMeta.bookTitle==='Haggai')unlock('haggai_master')}const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');if((stats['Acts']?.answered||0)>=100)unlock('acts_missionary');if((stats['Isaiah']?.answered||0)>=250)unlock('isaiah_scholar');if((stats['Proverbs']?.answered||0)>=150)unlock('proverbs_sage');if((stats['2 Samuel']?.answered||0)>=75)unlock('samuel_kingdom');const bookTitles=Object.values(BOOKS).map(b=>b.title);if(bookTitles.every(t=>(stats[t]?.played||0)>0))unlock('champion')}
+function updateAchievements(total,correct,accuracy){if(accuracy===100){    addXP(100);    unlock('perfect_round');    if(currentRoundMeta.bookTitle==='Haggai'){     unlock('haggai_master');   }  }unlock('perfect_round');if(currentRoundMeta.bookTitle==='Haggai')unlock('haggai_master')}const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');if((stats['Acts']?.answered||0)>=100)unlock('acts_missionary');if((stats['Isaiah']?.answered||0)>=250)unlock('isaiah_scholar');if((stats['Proverbs']?.answered||0)>=150)unlock('proverbs_sage');if((stats['2 Samuel']?.answered||0)>=75)unlock('samuel_kingdom');const bookTitles=Object.values(BOOKS).map(b=>b.title);if(bookTitles.every(t=>(stats[t]?.played||0)>0))unlock('champion')}
 function showAchievements(){const unlocked=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');$('achievementsContent').innerHTML=ACHIEVEMENTS.map(a=>`<div class="answer-box"><p><strong>${unlocked[a.id]?'🏆':'🔒'} ${a.name}</strong></p><p>${a.desc}</p>${unlocked[a.id]?`<p class="small">Unlocked: ${new Date(unlocked[a.id]).toLocaleDateString()}</p>`:''}</div>`).join('');showScreen('achievementsScreen')}
 function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)
 }
