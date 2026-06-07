@@ -206,6 +206,25 @@ function questionValue(){return 10+Math.floor(currentIndex/5)*10}
 function unlock(id){const ach=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');if(!ach[id]){ach[id]=Date.now();localStorage.setItem('bbpAchievements',JSON.stringify(ach));playAchievementSound()}}
 function updateAchievements(total,correct,accuracy){if(accuracy===100){unlock('perfect_round');if(currentRoundMeta.bookTitle==='Haggai')unlock('haggai_master')}const stats=JSON.parse(localStorage.getItem('bbpStats')||'{}');if((stats['Acts']?.answered||0)>=100)unlock('acts_missionary');if((stats['Isaiah']?.answered||0)>=250)unlock('isaiah_scholar');if((stats['Proverbs']?.answered||0)>=150)unlock('proverbs_sage');if((stats['2 Samuel']?.answered||0)>=75)unlock('samuel_kingdom');const bookTitles=Object.values(BOOKS).map(b=>b.title);if(bookTitles.every(t=>(stats[t]?.played||0)>0))unlock('champion')}
 function showAchievements(){const unlocked=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');$('achievementsContent').innerHTML=ACHIEVEMENTS.map(a=>`<div class="answer-box"><p><strong>${unlocked[a.id]?'🏆':'🔒'} ${a.name}</strong></p><p>${a.desc}</p>${unlocked[a.id]?`<p class="small">Unlocked: ${new Date(unlocked[a.id]).toLocaleDateString()}</p>`:''}</div>`).join('');showScreen('achievementsScreen')}
-function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!bgMusic) return;
+
+  if (document.hidden) {
+    bgMusic.pause();
+  } else {
+    handleMusicForScreen(getActiveScreenId());
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  if (bgMusic) bgMusic.pause();
+});
+
+window.addEventListener("blur", () => {
+  if (bgMusic) bgMusic.pause();
+});
 
 window.onload=init;
