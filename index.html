@@ -38,33 +38,33 @@
       <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
     </section>
 
-    <section id="settingsScreen" class="screen">
-      <h2>⚙️ Settings</h2>
-      <div class="card scroll-card">
-        <label>
-          <input type="checkbox" id="musicToggle" checked>
-          Enable Background Music
-        </label>
+<section id="settingsScreen" class="screen">
+  <h2>⚙️ Settings</h2>
 
-        <label>
-          Music Volume
-          <input type="range" id="volumeSlider" min="0" max="100" value="50">
-        </label>
+  <div class="card scroll-card">
+    <p><strong>Background Music</strong></p>
+    <button id="musicToggleBtn" onclick="toggleMusicSetting()">Music: ON</button>
 
-        <label>
-          <input type="checkbox" id="quizMusicToggle" checked>
-          Play Music During Quiz
-        </label>
+    <p><strong>Sound Effects</strong></p>
+    <button id="soundToggleBtn" onclick="toggleSoundSetting()">Sound FX: ON</button>
 
-        <label>
-          <input type="checkbox" id="soundToggle" checked>
-          Enable Sound Effects
-        </label>
+    <p><strong>Music During Quiz</strong></p>
+    <button id="quizMusicToggleBtn" onclick="toggleQuizMusicSetting()">Quiz Music: ON</button>
 
-        <p class="footer-note">Music starts after your first click because browsers block autoplay.</p>
-      </div>
-      <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
-    </section>
+    <div id="volumeControlBox">
+      <p><strong>Music Volume</strong></p>
+      <input type="range" id="volumeSlider" min="0" max="100" value="50">
+    </div>
+
+    <p id="iosVolumeNote" class="footer-note hidden">
+      On iPhone/iPad, use your device volume buttons to control music volume.
+    </p>
+
+    <p class="footer-note">Music starts after your first click because browsers block autoplay.</p>
+  </div>
+
+  <button class="secondary" onclick="showScreen('mainMenu')">Back</button>
+</section>
 
     <section id="bookScreen" class="screen">
       <h2>Choose a Book</h2>
