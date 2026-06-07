@@ -8,7 +8,7 @@ let settings={
   music: localStorage.getItem('bbpMusic') !== 'false',
   quizMusic: localStorage.getItem('bbpQuizMusic') !== 'false',
   sound: localStorage.getItem('bbpSound') !== 'false',
-  volume: Number(localStorage.getItem('bbpVolume') || 0.35)
+  volume: Number(localStorage.getItem('bbpVolume') || 0.18)
 };
 
 const difficultySettings={veryEasy:{label:'Very Easy',tries:3,hints:true,exact:false,timer:false,multiple:true},easy:{label:'Easy',tries:3,hints:true,exact:false,timer:false,multiple:false},medium:{label:'Medium',tries:2,hints:false,exact:false,timer:false,multiple:false},hard:{label:'Hard',tries:1,hints:false,exact:true,timer:true,multiple:false}};
