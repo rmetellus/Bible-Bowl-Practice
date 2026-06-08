@@ -243,14 +243,19 @@ function changeMusicTrack(){
 
     bgMusic.load();
 
-    if(wasPlaying){
+    bgMusic.volume =
+      settings.volume;
+
+    if(
+      wasPlaying &&
+      settings.music
+    ){
       bgMusic.play().catch(()=>{});
     }
 
   }
 
 }
-
 function getActiveScreenId(){
   const active=document.querySelector('.screen.active');
   return active?active.id:'mainMenu';
