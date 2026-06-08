@@ -35,9 +35,9 @@ function showScreen(id, addToHistory = true){
   const current =
     document.querySelector('.screen.active');
 
-  if(current && addToHistory){
-    screenHistory.push(current.id);
-  }
+ if(current && addToHistory && current.id !== id){
+  screenHistory.push(current.id);
+}
 
   document
     .querySelectorAll('.screen')
@@ -69,6 +69,7 @@ function init(){
   renderBookButtons();
   bestStreak=Number(localStorage.getItem('bbpBestStreak')||0);
   renderResumeNotice();
+  renderLevelCard();
   initAudio();
 }
 
@@ -357,7 +358,31 @@ function renderStats(){
   $('statsContent').innerHTML = html;
 
 }
-function resetStats(){if(confirm('Reset all saved stats and achievements?')){['bbpStats','bbpBestStreak','bbpAchievements','bbpReviewBank','bbpSavedRound'].forEach(k=>localStorage.removeItem(k));bestStreak=0;renderStats();renderResumeNotice()}}
+function resetStats(){
+
+  if(confirm('Reset all saved stats and achievements?')){
+
+    [
+      'bbpStats',
+      'bbpBestStreak',
+      'bbpAchievements',
+      'bbpReviewBank',
+      'bbpSavedRound',
+      'bbpXP',
+      'bbpLevel'
+    ].forEach(k => localStorage.removeItem(k));
+
+    bestStreak = 0;
+    xp = 0;
+    level = 1;
+
+    renderStats();
+    renderResumeNotice();
+    renderLevelCard();
+
+  }
+
+}
 function saveRound(){if(!currentQuestions.length||answered&&currentIndex>=currentQuestions.length)return;localStorage.setItem('bbpSavedRound',JSON.stringify({selectedBookKey,selectedDifficulty,selectedMode,selectedSetLabel,currentQuestions,currentIndex,score,missedQuestions,streak,bestStreak,startTime,currentRoundMeta,tournamentMode,tournamentPoints,bookTitle:currentRoundMeta.bookTitle||BOOKS[selectedBookKey]?.title||'Mixed'}))}
 function loadSavedRound(){try{return JSON.parse(localStorage.getItem('bbpSavedRound')||'null')}catch{return null}}
 function clearSavedRound(){localStorage.removeItem('bbpSavedRound')}
@@ -388,6 +413,8 @@ function addXP(amount){
 
   localStorage.setItem('bbpXP', xp);
 
+  renderLevelCard();
+
 }
 
 function getRank(){
@@ -401,6 +428,29 @@ function getRank(){
   return '🌱 Beginner';
 
 }
+
+function renderLevelCard(){
+
+  const rankEl = $('rankText');
+  const levelEl = $('levelText');
+  const xpEl = $('xpText');
+  const fillEl = $('xpFill');
+
+  if(!rankEl || !levelEl || !xpEl || !fillEl) return;
+
+  const currentLevelStart = (level - 1) * 100;
+  const nextLevelXP = level * 100;
+  const progressXP = xp - currentLevelStart;
+  const neededXP = nextLevelXP - currentLevelStart;
+  const percent = Math.min(100, Math.max(0, progressXP / neededXP * 100));
+
+  rankEl.textContent = getRank();
+  levelEl.textContent = `Level ${level}`;
+  xpEl.textContent = `XP: ${progressXP} / ${neededXP}`;
+  fillEl.style.width = `${percent}%`;
+
+}
+
 
 function showLevelUpPopup(){
 
