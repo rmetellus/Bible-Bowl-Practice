@@ -6,6 +6,11 @@ let screenHistory = [];
 
 let bgMusic=null;
 let audioStarted=false;
+
+let selectedMusic =
+  localStorage.getItem('bbpMusicTrack')
+  || 'menu-theme.mp3';
+
 let settings={
   music: localStorage.getItem('bbpMusic') !== 'false',
   quizMusic: localStorage.getItem('bbpQuizMusic') !== 'false',
@@ -77,7 +82,14 @@ function initAudio(){
 
   bgMusic = $('bgMusic');
 
+  const musicSelect = $('musicSelect');
+
+  if(musicSelect){
+    musicSelect.value = selectedMusic;
+  }
+
   if(bgMusic){
+    bgMusic.src = `audio/${selectedMusic}`;
     bgMusic.volume = settings.volume;
   }
 
@@ -205,6 +217,37 @@ function toggleQuizMusicSetting(){
   handleMusicForScreen(
     getActiveScreenId()
   );
+
+}
+
+function changeMusicTrack(){
+
+  const musicSelect = $('musicSelect');
+
+  if(!musicSelect) return;
+
+  selectedMusic = musicSelect.value;
+
+  localStorage.setItem(
+    'bbpMusicTrack',
+    selectedMusic
+  );
+
+  if(bgMusic){
+
+    const wasPlaying =
+      !bgMusic.paused;
+
+    bgMusic.src =
+      `audio/${selectedMusic}`;
+
+    bgMusic.load();
+
+    if(wasPlaying){
+      bgMusic.play().catch(()=>{});
+    }
+
+  }
 
 }
 
