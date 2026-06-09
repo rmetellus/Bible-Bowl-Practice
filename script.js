@@ -313,10 +313,25 @@ function changeMusicTrack(){
 
 }
 
+let lastTrack = '';
+
 function getRandomMusicTrack(){
-  return MUSIC_TRACKS[
-    Math.floor(Math.random() * MUSIC_TRACKS.length)
-  ];
+
+  let track;
+
+  do{
+    track = MUSIC_TRACKS[
+      Math.floor(Math.random() * MUSIC_TRACKS.length)
+    ];
+  }while(
+    MUSIC_TRACKS.length > 1 &&
+    track === lastTrack
+  );
+
+  lastTrack = track;
+
+  return track;
+
 }
 
 function getActiveScreenId(){
