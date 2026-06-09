@@ -462,8 +462,21 @@ function isCorrect(userAnswer, correctAnswer){
 
   if(user === correct) return true;
 
-  if(correct.includes(user) && user.length >= 4) return true;
-  if(user.includes(correct) && correct.length >= 4) return true;
+  const correctWords = getImportantWords(correct);
+const userWords = getImportantWords(user);
+
+const score = keywordMatchScore(
+  userWords,
+  correctWords
+);
+
+if(selectedDifficulty === 'easy'){
+  if(score >= 0.50) return true;
+}
+
+if(selectedDifficulty === 'medium'){
+  if(score >= 0.70) return true;
+}
 
   const correctWords = getImportantWords(correct);
   const userWords = getImportantWords(user);
@@ -504,6 +517,7 @@ function normalize(t){
   return String(t)
     .toLowerCase()
     .replace(/&/g,'and')
+
     .replace(/\bfirst\b/g,'1st')
     .replace(/\bsecond\b/g,'2nd')
     .replace(/\bthird\b/g,'3rd')
@@ -514,6 +528,9 @@ function normalize(t){
     .replace(/\beighth\b/g,'8th')
     .replace(/\bninth\b/g,'9th')
     .replace(/\btenth\b/g,'10th')
+    .replace(/\beleventh\b/g,'11th')
+    .replace(/\btwelfth\b/g,'12th')
+
     .replace(/\bone\b/g,'1')
     .replace(/\btwo\b/g,'2')
     .replace(/\bthree\b/g,'3')
@@ -524,8 +541,14 @@ function normalize(t){
     .replace(/\beight\b/g,'8')
     .replace(/\bnine\b/g,'9')
     .replace(/\bten\b/g,'10')
+
+    .replace(/\b1st day\b/g,'1st')
+    .replace(/\b2nd year\b/g,'2nd')
+    .replace(/\b3rd year\b/g,'3rd')
+
     .replace(/\bking\b/g,'')
     .replace(/\bthe\b/g,'')
+
     .replace(/[^a-z0-9\s,]/g,'')
     .replace(/\s+/g,' ')
     .trim();
