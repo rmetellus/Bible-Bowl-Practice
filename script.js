@@ -463,45 +463,30 @@ function isCorrect(userAnswer, correctAnswer){
   if(user === correct) return true;
 
   const correctWords = getImportantWords(correct);
-const userWords = getImportantWords(user);
-
-const score = keywordMatchScore(
-  userWords,
-  correctWords
-);
-
-if(selectedDifficulty === 'easy'){
-  if(score >= 0.50) return true;
-}
-
-if(selectedDifficulty === 'medium'){
-  if(score >= 0.70) return true;
-}
-
-  const correctWords = getImportantWords(correct);
   const userWords = getImportantWords(user);
 
-  if(correctWords.length >= 6){
-    const score = keywordMatchScore(userWords, correctWords);
+  const keywordScore = keywordMatchScore(
+    userWords,
+    correctWords
+  );
 
-    if(selectedDifficulty === 'easy'){
-      return score >= 0.55;
-    }
+  if(selectedDifficulty === 'easy'){
+    if(keywordScore >= 0.50) return true;
+  }
 
-    if(selectedDifficulty === 'medium'){
-      return score >= 0.70;
-    }
+  if(selectedDifficulty === 'medium'){
+    if(keywordScore >= 0.70) return true;
   }
 
   if(isListAnswer(correct)){
-    const score = listMatchScore(user, correct);
+    const listScore = listMatchScore(user, correct);
 
     if(selectedDifficulty === 'easy'){
-      return score >= 0.50;
+      return listScore >= 0.50;
     }
 
     if(selectedDifficulty === 'medium'){
-      return score >= 0.70;
+      return listScore >= 0.70;
     }
   }
 
