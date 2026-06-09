@@ -443,8 +443,152 @@ function showResults(){clearTimer();const total=currentQuestions.length,accuracy
 function retryMissed(){const missed=[...missedQuestions];selectedQuestions=missed;selectedSetLabel='Retry Missed Questions';startGame(missed)}
 function restartSameSetup(){startGame()}
 function confirmExit(){if(confirm('Exit this practice round? Your progress will be saved.')){saveRound();showScreen('mainMenu');renderResumeNotice()}}
-function isCorrect(userAnswer,correctAnswer){const s=difficultySettings[selectedDifficulty];if(s.multiple)return userAnswer===correctAnswer;const user=normalize(userAnswer),correct=normalize(correctAnswer);if(s.exact)return user===correct;if(user===correct)return true;if(correct.includes(user)&&user.length>=4)return true;if(user.includes(correct)&&correct.length>=4)return true;const d=levenshtein(user,correct),allowed=Math.max(2,Math.floor(correct.length*.25));return d<=allowed}
-function normalize(t){return String(t).toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9\s]/g,'').replace(/\bthe\b/g,'').replace(/\s+/g,' ').trim()}
+function isCorrect(userAnswer, correctAnswer){
+
+  const s = difficultySettings[selectedDifficulty];
+
+  if(s.multiple){
+    return userAnswer === correctAnswer;
+  }
+
+  const user = normalize(userAnswer);
+  const correct = normalize(correctAnswer);
+
+  if(!user || !correct) return false;
+
+  if(s.exact){
+    return user === correct;
+  }
+
+  if(user === correct) return true;
+
+  if(correct.includes(user) && user.length >= 4) return true;
+  if(user.includes(correct) && correct.length >= 4) return true;
+
+  const correctWords = getImportantWords(correct);
+  const userWords = getImportantWords(user);
+
+  if(correctWords.length >= 6){
+    const score = keywordMatchScore(userWords, correctWords);
+
+    if(selectedDifficulty === 'easy'){
+      return score >= 0.55;
+    }
+
+    if(selectedDifficulty === 'medium'){
+      return score >= 0.70;
+    }
+  }
+
+  if(isListAnswer(correct)){
+    const score = listMatchScore(user, correct);
+
+    if(selectedDifficulty === 'easy'){
+      return score >= 0.50;
+    }
+
+    if(selectedDifficulty === 'medium'){
+      return score >= 0.70;
+    }
+  }
+
+  const d = levenshtein(user, correct);
+  const allowed = Math.max(2, Math.floor(correct.length * 0.25));
+
+  return d <= allowed;
+
+}
+
+function normalize(t){
+
+  return String(t)
+    .toLowerCase()
+    .replace(/&/g,'and')
+    .replace(/\bfirst\b/g,'1st')
+    .replace(/\bsecond\b/g,'2nd')
+    .replace(/\bthird\b/g,'3rd')
+    .replace(/\bfourth\b/g,'4th')
+    .replace(/\bfifth\b/g,'5th')
+    .replace(/\bsixth\b/g,'6th')
+    .replace(/\bseventh\b/g,'7th')
+    .replace(/\beighth\b/g,'8th')
+    .replace(/\bninth\b/g,'9th')
+    .replace(/\btenth\b/g,'10th')
+    .replace(/\bone\b/g,'1')
+    .replace(/\btwo\b/g,'2')
+    .replace(/\bthree\b/g,'3')
+    .replace(/\bfour\b/g,'4')
+    .replace(/\bfive\b/g,'5')
+    .replace(/\bsix\b/g,'6')
+    .replace(/\bseven\b/g,'7')
+    .replace(/\beight\b/g,'8')
+    .replace(/\bnine\b/g,'9')
+    .replace(/\bten\b/g,'10')
+    .replace(/\bking\b/g,'')
+    .replace(/\bthe\b/g,'')
+    .replace(/[^a-z0-9\s,]/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+
+}
+
+function getImportantWords(text){
+
+  const fillerWords = [
+    'and','or','but','in','on','at','to','of','for','with',
+    'a','an','as','is','it','was','were','be','by','from',
+    'that','this','these','those','do','did','does','ye',
+    'you','your','his','her','their','our','among'
+  ];
+
+  return text
+    .split(/\s+/)
+    .filter(w => w.length > 2)
+    .filter(w => !fillerWords.includes(w));
+
+}
+
+function keywordMatchScore(userWords, correctWords){
+
+  if(!correctWords.length) return 0;
+
+  let matched = 0;
+
+  correctWords.forEach(word => {
+    if(userWords.includes(word)){
+      matched++;
+    }
+  });
+
+  return matched / correctWords.length;
+
+}
+
+function isListAnswer(text){
+  return text.includes(',');
+}
+
+function listMatchScore(user, correct){
+
+  const correctParts = correct
+    .split(',')
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  if(!correctParts.length) return 0;
+
+  let matched = 0;
+
+  correctParts.forEach(part => {
+    if(user.includes(part) || part.includes(user)){
+      matched++;
+    }
+  });
+
+  return matched / correctParts.length;
+
+}
+
 function levenshtein(a,b){const dp=Array.from({length:a.length+1},()=>Array(b.length+1).fill(0));for(let i=0;i<=a.length;i++)dp[i][0]=i;for(let j=0;j<=b.length;j++)dp[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return dp[a.length][b.length]}
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
 function startTopMenu(){const box=$('topButtons');box.innerHTML='';Object.entries(BOOKS).forEach(([key,b])=>{const btn=document.createElement('button');btn.textContent=`${b.title} Top ${b.topQuestions.length}`;btn.onclick=()=>{selectedBookKey=key;selectedQuestions=[...b.topQuestions];selectedSetLabel=`Top ${b.topQuestions.length}`;showScreen('difficultyScreen')};box.appendChild(btn)});const grand=document.createElement('button');grand.textContent='Grand Championship 100';grand.onclick=()=>{selectedBookKey='acts';selectedQuestions=[];Object.values(BOOKS).forEach(b=>selectedQuestions.push(...b.topQuestions.slice(0,Math.ceil(100/Object.keys(BOOKS).length))));shuffle(selectedQuestions);selectedQuestions=selectedQuestions.slice(0,100);selectedSetLabel='Grand Championship 100';showScreen('difficultyScreen')};box.appendChild(grand);showScreen('topMenuScreen')}
