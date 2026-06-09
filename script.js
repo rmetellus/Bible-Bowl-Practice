@@ -106,26 +106,33 @@ function initAudio(){
 
   bgMusic.src = `audio/${trackToPlay}`;
   bgMusic.volume = settings.volume;
+
+    updateLoopMode();
 }
 
-  if(bgMusic){
+ if(bgMusic){
+
   bgMusic.addEventListener('ended',()=>{
 
-    if(selectedMusic !== 'shuffle') return;
+    if(selectedMusic !== 'shuffle')
+      return;
 
-    const nextTrack = getRandomMusicTrack();
+    const nextTrack =
+      getRandomMusicTrack();
 
-    bgMusic.src = `audio/${nextTrack}`;
+    bgMusic.src =
+      `audio/${nextTrack}`;
+
     bgMusic.load();
-    bgMusic.volume = settings.volume;
 
-    if(settings.music){
-      bgMusic.play().catch(()=>{});
-    }
+    bgMusic.volume =
+      settings.volume;
+
+    bgMusic.play().catch(()=>{});
 
   });
-}
 
+}
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const volumeBox = $('volumeControlBox');
@@ -223,6 +230,15 @@ function toggleMusicSetting(){
 
 }
 
+function updateLoopMode(){
+
+  if(!bgMusic) return;
+
+  bgMusic.loop =
+    selectedMusic !== 'shuffle';
+
+}
+
 function toggleSoundSetting(){
 
   settings.sound = !settings.sound;
@@ -265,6 +281,8 @@ function changeMusicTrack(){
     'bbpMusicTrack',
     selectedMusic
   );
+
+  updateLoopMode();
 
   if(bgMusic){
 
