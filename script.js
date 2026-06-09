@@ -11,6 +11,16 @@ let selectedMusic =
   localStorage.getItem('bbpMusicTrack')
   || 'menu-theme.mp3';
 
+const MUSIC_TRACKS = [
+  'menu-theme.mp3',
+  'Beje-Mwen-Se-Yon Wa-Damou.mp3',
+  'Father-Can-You-Hear Me.mp3',
+  'Gen-Yon-Jou-Kap-Vini.mp3',
+  'Konfyem-nan-Dye.mp3',
+  'Li-Konnen-m-la.mp3',
+  'Sans-Jésus-mon-Ciel est-voilé.mp3'
+];
+
 let settings={
   music: localStorage.getItem('bbpMusic') !== 'false',
   quizMusic: localStorage.getItem('bbpQuizMusic') !== 'false',
@@ -89,9 +99,32 @@ function initAudio(){
   }
 
   if(bgMusic){
-    bgMusic.src = `audio/${selectedMusic}`;
+  const trackToPlay =
+    selectedMusic === 'shuffle'
+      ? getRandomMusicTrack()
+      : selectedMusic;
+
+  bgMusic.src = `audio/${trackToPlay}`;
+  bgMusic.volume = settings.volume;
+}
+
+  if(bgMusic){
+  bgMusic.addEventListener('ended',()=>{
+
+    if(selectedMusic !== 'shuffle') return;
+
+    const nextTrack = getRandomMusicTrack();
+
+    bgMusic.src = `audio/${nextTrack}`;
+    bgMusic.load();
     bgMusic.volume = settings.volume;
-  }
+
+    if(settings.music){
+      bgMusic.play().catch(()=>{});
+    }
+
+  });
+}
 
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -238,8 +271,13 @@ function changeMusicTrack(){
     const wasPlaying =
       !bgMusic.paused;
 
+    const trackToPlay =
+      selectedMusic === 'shuffle'
+        ? getRandomMusicTrack()
+        : selectedMusic;
+
     bgMusic.src =
-      `audio/${selectedMusic}`;
+      `audio/${trackToPlay}`;
 
     bgMusic.load();
 
@@ -256,6 +294,13 @@ function changeMusicTrack(){
   }
 
 }
+
+function getRandomMusicTrack(){
+  return MUSIC_TRACKS[
+    Math.floor(Math.random() * MUSIC_TRACKS.length)
+  ];
+}
+
 function getActiveScreenId(){
   const active=document.querySelector('.screen.active');
   return active?active.id:'mainMenu';
