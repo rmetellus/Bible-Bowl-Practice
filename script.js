@@ -514,8 +514,33 @@ function isCorrect(userAnswer, correctAnswer){
     const listScore = listMatchScore(user, correct);
 
     if(selectedDifficulty === 'easy'){
-      return listScore >= 0.50;
+
+  const correctParts = correct
+    .split(',')
+    .map(x=>x.trim())
+    .filter(Boolean);
+
+  let matches = 0;
+
+  correctParts.forEach(part=>{
+
+    const normalizedPart =
+      normalize(part);
+
+    if(
+      user.includes(normalizedPart) ||
+      normalizedPart.includes(user)
+    ){
+      matches++;
     }
+
+  });
+
+  if(matches >= 2){
+    return true;
+  }
+
+}
 
     if(selectedDifficulty === 'medium'){
       return listScore >= 0.70;
