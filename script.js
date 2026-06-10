@@ -462,6 +462,13 @@ function isCorrect(userAnswer, correctAnswer){
 
   if(user === correct) return true;
 
+  if(
+  selectedDifficulty === 'easy' &&
+  partialPhraseMatch(user, correct)
+){
+  return true;
+}
+
   const correctWords = getImportantWords(correct);
   const userWords = getImportantWords(user);
 
@@ -471,12 +478,18 @@ function isCorrect(userAnswer, correctAnswer){
   );
 
   if(selectedDifficulty === 'easy'){
-    if(keywordScore >= 0.50) return true;
-  }
+
+    if(keywordScore >= 0.45)
+        return true;
+
+}
 
   if(selectedDifficulty === 'medium'){
-    if(keywordScore >= 0.70) return true;
-  }
+
+    if(keywordScore >= 0.65)
+        return true;
+
+}
 
   if(isListAnswer(correct)){
     const listScore = listMatchScore(user, correct);
@@ -594,6 +607,30 @@ function listMatchScore(user, correct){
   });
 
   return matched / correctParts.length;
+
+}
+
+function partialPhraseMatch(user, correct){
+
+  const userWords =
+    getImportantWords(user);
+
+  const correctWords =
+    getImportantWords(correct);
+
+  if(userWords.length < 3)
+    return false;
+
+  let matched = 0;
+
+  userWords.forEach(word=>{
+
+    if(correctWords.includes(word))
+      matched++;
+
+  });
+
+  return matched / userWords.length >= 0.75;
 
 }
 
