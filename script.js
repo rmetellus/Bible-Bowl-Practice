@@ -510,42 +510,48 @@ function isCorrect(userAnswer, correctAnswer){
 
 }
 
-  if(isListAnswer(correct)){
-    const listScore = listMatchScore(user, correct);
+ if(isListAnswer(correct)){
 
-    if(selectedDifficulty === 'easy'){
+  const listScore = listMatchScore(user, correct);
 
-  const correctParts = correct
-    .split(',')
-    .map(x=>x.trim())
-    .filter(Boolean);
+  if(selectedDifficulty === 'easy'){
 
-  let matches = 0;
+    const correctParts = correct
+      .split(',')
+      .map(x => x.trim())
+      .filter(Boolean);
 
-  correctParts.forEach(part=>{
+    let matches = 0;
 
-    const normalizedPart =
-      normalize(part);
+    correctParts.forEach(part => {
 
-    if(
-      user.includes(normalizedPart) ||
-      normalizedPart.includes(user)
-    ){
-      matches++;
+      const partWords = getImportantWords(part);
+      const userWords = getImportantWords(user);
+
+      const partScore = keywordMatchScore(
+        userWords,
+        partWords
+      );
+
+      if(partScore >= 0.60){
+        matches++;
+      }
+
+    });
+
+    if(matches >= 2){
+      return true;
     }
 
-  });
+    return listScore >= 0.35;
 
-  if(matches >= 2){
-    return true;
+  }
+
+  if(selectedDifficulty === 'medium'){
+    return listScore >= 0.70;
   }
 
 }
-
-    if(selectedDifficulty === 'medium'){
-      return listScore >= 0.70;
-    }
-  }
 
   const d = levenshtein(user, correct);
   const allowed = Math.max(2, Math.floor(correct.length * 0.25));
