@@ -86,6 +86,28 @@ function init(){
   renderResumeNotice();
   renderLevelCard();
   initAudio();
+
+  const answerInput = $('answerInput');
+
+  if(answerInput){
+
+    answerInput.addEventListener('keydown', function(e){
+
+      if(e.key === 'Enter'){
+
+        e.preventDefault();
+
+        if(!$('submitBtn').classList.contains('hidden')){
+          submitAnswer();
+        }else if(!$('nextBtn').classList.contains('hidden')){
+          nextQuestion();
+        }
+
+      }
+
+    });
+
+  }
 }
 
 function initAudio(){
