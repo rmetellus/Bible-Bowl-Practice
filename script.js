@@ -105,28 +105,6 @@ function init(){
   renderResumeNotice();
   renderLevelCard();
   initAudio();
-
-  const answerInput = $('answerInput');
-
-  if(answerInput){
-
-    answerInput.addEventListener('keydown', function(e){
-
-      if(e.key === 'Enter'){
-
-        e.preventDefault();
-
-        if(!$('submitBtn').classList.contains('hidden')){
-          submitAnswer();
-        }else if(!$('nextBtn').classList.contains('hidden')){
-          nextQuestion();
-        }
-
-      }
-
-    });
-
-  }
 }
 
 function initAudio(){
@@ -988,6 +966,30 @@ window.addEventListener("pagehide", () => {
 
 window.addEventListener("blur", () => {
   if (bgMusic) bgMusic.pause();
+});
+
+document.addEventListener('keydown', function(e){
+
+  if(e.key !== 'Enter') return;
+
+  const activeScreen = document.querySelector('.screen.active');
+
+  if(activeScreen && activeScreen.id === 'gameScreen'){
+
+    e.preventDefault();
+
+    if(!$('nextBtn').classList.contains('hidden')){
+      nextQuestion();
+      return;
+    }
+
+    if(!$('submitBtn').classList.contains('hidden')){
+      submitAnswer();
+      return;
+    }
+
+  }
+
 });
 
 window.onload=init;
