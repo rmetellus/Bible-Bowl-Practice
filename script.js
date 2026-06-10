@@ -32,14 +32,33 @@ const difficultySettings={veryEasy:{label:'Very Easy',tries:3,hints:true,exact:f
 
 const ACHIEVEMENTS=[
   {id:'first_correct',name:'First Question Correct',desc:'Answer your first question correctly.'},
+  {id:'streak_5',name:'Getting Warm',desc:'Get a 5-answer streak.'},
   {id:'streak_10',name:'Hot Streak',desc:'Get a 10-answer streak.'},
+  {id:'streak_20',name:'Unstoppable',desc:'Get a 20-answer streak.'},
+
+  {id:'level_5',name:'Rising Student',desc:'Reach Level 5.'},
+  {id:'level_10',name:'Bible Scholar',desc:'Reach Level 10.'},
+  {id:'level_20',name:'Elder Status',desc:'Reach Level 20.'},
+  {id:'level_30',name:'Champion Rank',desc:'Reach Level 30.'},
+  {id:'level_50',name:'Hall of Faith',desc:'Reach Level 50.'},
+
   {id:'perfect_round',name:'Perfect Round',desc:'Finish any round with 100%.'},
+  {id:'perfect_5',name:'Perfectionist',desc:'Get 5 perfect rounds.'},
+  {id:'hard_perfect',name:'Hard Mode Hero',desc:'Get a perfect round on Hard.'},
+
+  {id:'answer_100',name:'100 Club',desc:'Answer 100 total questions.'},
+  {id:'answer_500',name:'500 Club',desc:'Answer 500 total questions.'},
+  {id:'answer_1000',name:'1000 Club',desc:'Answer 1,000 total questions.'},
+
   {id:'haggai_master',name:'Haggai Master',desc:'Score 100% on Haggai.'},
   {id:'acts_missionary',name:'Acts Missionary',desc:'Answer 100 Acts questions.'},
   {id:'isaiah_scholar',name:'Isaiah Scholar',desc:'Answer 250 Isaiah questions.'},
   {id:'proverbs_sage',name:'Proverbs Sage',desc:'Answer 150 Proverbs questions.'},
   {id:'samuel_kingdom',name:'Kingdom Historian',desc:'Answer 75 questions in 2 Samuel.'},
+
   {id:'tournament_player',name:'Tournament Player',desc:'Complete a tournament round.'},
+  {id:'tournament_champion',name:'Tournament Champion',desc:'Score 80% or higher in Tournament Mode.'},
+
   {id:'champion',name:'Bible Bowl Champion',desc:'Complete at least one round in every book.'}
 ];
 
@@ -454,7 +473,7 @@ function updateStreakDisplay(){
 function loadQuestion(){clearTimer();answered=false;selectedChoice=null;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];triesLeft=s.tries;$('questionProgress').textContent=`${currentIndex+1}/${currentQuestions.length}`;$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;updateStreakDisplay();$('timerText').textContent=s.timer?'Time: 10':'';$('verseTag').textContent=q.verse;$('questionText').textContent=tournamentMode?`[${questionValue()} pts] ${q.question}`:q.question;$('triesText').textContent=`Tries Remaining: ${triesLeft}`;$('feedbackText').textContent='';$('feedbackText').className='';$('answerReveal').classList.add('hidden');$('submitBtn').classList.remove('hidden');$('nextBtn').classList.add('hidden');$('hintBtn').classList.toggle('hidden',!s.hints);$('answerInput').value='';$('answerInput').disabled=false;$('answerInput').style.display=s.multiple?'none':'block';$('multipleChoiceBox').classList.toggle('hidden',!s.multiple);if(s.multiple)renderChoices(q);else $('answerInput').focus();if(s.timer)startTimer();saveRound()}
 function renderChoices(q){const box=$('multipleChoiceBox');let pool=(BOOKS[selectedBookKey]?.questions||Object.values(BOOKS).flatMap(b=>b.questions)).filter(x=>x.answer!==q.answer).map(x=>x.answer);shuffle(pool);const choices=[q.answer,...pool.slice(0,3)];shuffle(choices);box.innerHTML=choices.map(c=>`<button class="choice" onclick="chooseAnswer(this, ${JSON.stringify(c).replace(/"/g,'&quot;')})">${c}</button>`).join('')}
 function chooseAnswer(btn,ans){selectedChoice=ans;document.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')}
-function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++; addXP(10); if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak>=10)unlock('streak_10');  if(streak===5 || streak===10 || streak===20){   playAchievementSound(); }$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;updateStreakDisplay();$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
+function submitAnswer(){if(answered)return;const s=difficultySettings[selectedDifficulty],q=currentQuestions[currentIndex];const ua=s.multiple?selectedChoice:$('answerInput').value.trim();if(!ua){$('feedbackText').textContent=s.multiple?'Choose an answer first.':'Type an answer first.';return}if(isCorrect(ua,q.answer)){playCorrectSound();score++; addXP(10); if(tournamentMode)tournamentPoints+=questionValue();streak++;bestStreak=Math.max(bestStreak,streak);localStorage.setItem('bbpBestStreak',bestStreak);unlock('first_correct');if(streak >= 5) unlock('streak_5'); if(streak >= 10) unlock('streak_10'); if(streak >= 20) unlock('streak_20');  if(streak===5 || streak===10 || streak===20){   playAchievementSound(); }$('feedbackText').textContent='✅ Correct!';$('feedbackText').className='correct';finishQuestion(true)}else{triesLeft--;streak=0;updateStreakDisplay();$('triesText').textContent=`Tries Remaining: ${triesLeft}`;if(triesLeft>0){$('feedbackText').textContent='❌ Not quite. Try again.';$('feedbackText').className='incorrect';playWrongSound()}else{$('feedbackText').textContent='❌ Incorrect.';$('feedbackText').className='incorrect';playWrongSound();missedQuestions.push(q);addToReviewBank(q);finishQuestion(false)}}}
 function finishQuestion(){clearTimer();answered=true;const q=currentQuestions[currentIndex];$('answerInput').disabled=true;$('submitBtn').classList.add('hidden');$('hintBtn').classList.add('hidden');$('nextBtn').classList.remove('hidden');$('scoreText').textContent=tournamentMode?`Points: ${tournamentPoints}`:`Score: ${score}`;updateStreakDisplay();$('answerReveal').innerHTML=`<p><strong>Answer:</strong> ${q.answer}</p><p><strong>Verse:</strong> ${q.verse}</p>`;$('answerReveal').classList.remove('hidden');saveRound()}
 function nextQuestion(){currentIndex++;currentIndex>=currentQuestions.length?showResults():loadQuestion()}
 function showHint(){const q=currentQuestions[currentIndex];$('feedbackText').textContent=`Hint: ${q.hint||smartHint(q)}`;$('feedbackText').className=''}
@@ -705,6 +724,7 @@ function resetStats(){
       'bbpAchievements',
       'bbpReviewBank',
       'bbpSavedRound',
+      'bbpPerfectRounds',
       'bbpXP',
       'bbpLevel'
     ].forEach(k => localStorage.removeItem(k));
@@ -751,6 +771,18 @@ function addXP(amount){
   localStorage.setItem('bbpXP', xp);
 
   renderLevelCard();
+
+  checkLevelAchievements();
+
+}
+
+function checkLevelAchievements(){
+
+  if(level >= 5) unlock('level_5');
+  if(level >= 10) unlock('level_10');
+  if(level >= 20) unlock('level_20');
+  if(level >= 30) unlock('level_30');
+  if(level >= 50) unlock('level_50');
 
 }
 
@@ -841,21 +873,70 @@ function showAchievementPopup(achievement){
 
 function updateAchievements(total,correct,accuracy){
 
-  if(accuracy===100){
+  if(accuracy === 100){
 
     addXP(100);
 
     unlock('perfect_round');
 
-    if(currentRoundMeta.bookTitle==='Haggai'){
+    let perfectRounds =
+      Number(
+        localStorage.getItem(
+          'bbpPerfectRounds'
+        ) || 0
+      );
+
+    perfectRounds++;
+
+    localStorage.setItem(
+      'bbpPerfectRounds',
+      perfectRounds
+    );
+
+    if(perfectRounds >= 5){
+      unlock('perfect_5');
+    }
+
+    if(selectedDifficulty === 'hard'){
+      unlock('hard_perfect');
+    }
+
+    if(currentRoundMeta.bookTitle === 'Haggai'){
       unlock('haggai_master');
     }
 
   }
 
+  if(tournamentMode){
+    unlock('tournament_player');
+
+    if(accuracy >= 80){
+      unlock('tournament_champion');
+    }
+  }
+
   const stats = JSON.parse(
     localStorage.getItem('bbpStats') || '{}'
   );
+
+  const totalAnswered =
+    Object.values(stats).reduce(
+      (sum,s) =>
+        sum + (s.answered || 0),
+      0
+    );
+
+  if(totalAnswered >= 100){
+    unlock('answer_100');
+  }
+
+  if(totalAnswered >= 500){
+    unlock('answer_500');
+  }
+
+  if(totalAnswered >= 1000){
+    unlock('answer_1000');
+  }
 
   if((stats['Acts']?.answered || 0) >= 100){
     unlock('acts_missionary');
@@ -873,9 +954,9 @@ function updateAchievements(total,correct,accuracy){
     unlock('samuel_kingdom');
   }
 
-  const bookTitles = Object.values(BOOKS).map(
-    b => b.title
-  );
+  const bookTitles =
+    Object.values(BOOKS)
+      .map(b => b.title);
 
   if(
     bookTitles.every(
@@ -886,6 +967,7 @@ function updateAchievements(total,correct,accuracy){
   }
 
 }
+
 function showAchievements(){const unlocked=JSON.parse(localStorage.getItem('bbpAchievements')||'{}');$('achievementsContent').innerHTML=ACHIEVEMENTS.map(a=>`<div class="answer-box"><p><strong>${unlocked[a.id]?'🏆':'🔒'} ${a.name}</strong></p><p>${a.desc}</p>${unlocked[a.id]?`<p class="small">Unlocked: ${new Date(unlocked[a.id]).toLocaleDateString()}</p>`:''}</div>`).join('');showScreen('achievementsScreen')}
 function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)
 }
