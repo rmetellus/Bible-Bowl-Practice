@@ -562,7 +562,9 @@ function normalize(t){
     .replace(/\b1st day\b/g,'1st')
     .replace(/\b2nd year\b/g,'2nd')
     .replace(/\b3rd year\b/g,'3rd')
-
+    
+    .replace(/\bmonth\b/g,'')
+    .replace(/\byear\b/g,'')
     .replace(/\bking\b/g,'')
     .replace(/\bthe\b/g,'')
 
