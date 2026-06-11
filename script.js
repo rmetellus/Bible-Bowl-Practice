@@ -11,14 +11,88 @@ let selectedMusic =
   localStorage.getItem('bbpMusicTrack')
   || 'menu-theme.mp3';
 
-const MUSIC_TRACKS = [
-  'menu-theme.mp3',
-  'Beje-Mwen-Se-Yon Wa-Damou.mp3',
-  'Father-Can-You-Hear Me.mp3',
-  'Gen-Yon-Jou-Kap-Vini.mp3',
-  'Konfyem-nan-Dye.mp3',
-  'Li-Konnen-m-la.mp3',
-  'Sans-Jésus-mon-Ciel est-voilé.mp3'
+const FAST_SONGS = [
+
+'AN NOU ALE LAKAY YAHWEH.mp3',
+'Adoration & Louange #2.mpg.mp3',
+'Beje-Mwen-Se-Yon Wa-Damou.mp3',
+'Bénissons DIEU par nos cantiques.mp3',
+'Bless The Lord.mp3',
+"C'est si bon Kompa Céleste.mp3",
+'DEBLOKE-M.mp3',
+'Distans M Rive.mp3',
+'Fok Mwen Di Ou.mp3',
+'Gade Gwose yon Bondye.mp3',
+'Gade m La Toujou.mp3',
+'Gemissant Sou Lesclavage.mp3',
+'Je Chanterai Ton Grand Amour.mp3',
+'Kompa Levanjil.mp3',
+'Leaning On The Everlasting Arms.mp3',
+'LOUEZ LOUEZ, GLOIRE À JÉZI.mp3',
+'Lontan Mwen Te Rete Nan Lògèy 2.mp3',
+'Lontan Mwen Te Rete Nan Lògèy.mp3',
+'Louange & Adoration #3.mp3',
+'Loure m ap Loure.mp3',
+'M Ap Travèse.mp3',
+'Ma repare tout sa cheni yo.mp3',
+'Miséricorde Insondable (Kompa Mix).mp3',
+'Mwen Byen Kontan Papa Mwen.mp3',
+'NEW DELLY BENSON MWEN SOU KONT ANWO.mp3',
+'Oh Happy Day.mp3',
+'Oh Joyeuse Espérance.mp3',
+'Quel beau Nom!.mp3',
+'Ranpli-m.mp3',
+'Roc séculaire.mp3',
+'Sa sa fe si wout la move.mp3',
+'Triomphons Chantons D\'allégresse.mp3',
+'menu-theme.mp3'
+
+];
+
+const SLOW_SONGS = [
+
+'ABANDONNE TA VIE.mp3',
+'ABRITEMOI.mp3',
+'Ave w M ap Pale.mp3',
+'Because He lives.mp3',
+'Change Me.mp3',
+'Create In Me A Clean Heart.mp3',
+'De Canaan.mp3',
+'Father-Can-You-Hear Me.mp3',
+'GLOIRE À L\'AGNEAU .mp3',
+'Gen-Yon-Jou-Kap-Vini.mp3',
+'Holy Holy Holy.mp3',
+'I Will Follow Him.mp3',
+'JE VEUX N\'ÊTRE QU\'À TOI.mp3',
+'JE VEUX T\'ADORER.mp3',
+'Je ne sais pas le jour.mp3',
+'Jezi la kounye.mp3',
+'Jésus, Tu es ma vie.mp3',
+'Kod la Kase.mp3',
+'Konfyem-nan-Dye.mp3',
+'Kris Gen Sipriz Pou Ou.mp3',
+'La Semence d\'Ici Bas.mp3',
+'Le Jezi La.mp3',
+'Let It Rise.mp3',
+'Li Kapab.mp3',
+'Li-Konnen-m-la.mp3',
+'My life is in your hands.mp3',
+'Ne Crains Rien.mp3',
+'Never Would\'ve Made It.mp3',
+'Nous avons soif.mp3',
+'Oh How I Love Jesus.mp3',
+'Ou Leve Mwen.mp3',
+'Pa Gen Lot.mp3',
+'Paket mwen mare .mp3',
+'QUE TES VIVES EAUX.mp3',
+'QUEL AMI FIDÈLE ET TENDRE.mp3',
+'Sans-Jésus-mon-Ciel-est-voilé.mp3',
+'Senye Pale .mp3',
+'Take Me to the King.mp3',
+'The Best In Me.mp3',
+'Un ami sur.mp3',
+'Une Nacelle En Silence.mp3'
+
 ];
 
 let settings={
@@ -117,18 +191,21 @@ function initAudio(){
     musicSelect.value = selectedMusic;
   }
 
-  if(bgMusic){
+if(bgMusic){
+
   const trackToPlay =
-    selectedMusic === 'shuffle'
-      ? getRandomMusicTrack()
-      : selectedMusic;
+    getTrackToPlay();
 
-  bgMusic.src = `audio/${trackToPlay}`;
-  bgMusic.volume = settings.volume;
+  bgMusic.src =
+    `audio/${trackToPlay}`;
 
-    updateLoopMode();
+  bgMusic.volume =
+    settings.volume;
+
+  updateLoopMode();
+
 }
-
+  
  if(bgMusic){
 
   bgMusic.addEventListener('ended',()=>{
@@ -309,9 +386,7 @@ function changeMusicTrack(){
       !bgMusic.paused;
 
     const trackToPlay =
-      selectedMusic === 'shuffle'
-        ? getRandomMusicTrack()
-        : selectedMusic;
+      getTrackToPlay();
 
     bgMusic.src =
       `audio/${trackToPlay}`;
@@ -334,16 +409,34 @@ function changeMusicTrack(){
 
 let lastTrack = '';
 
-function getRandomMusicTrack(){
+function getTrackToPlay(){
+
+  if(selectedMusic === 'shuffle-all'){
+    return getRandomMusicTrack(ALL_SONGS);
+  }
+
+  if(selectedMusic === 'shuffle-fast'){
+    return getRandomMusicTrack(FAST_SONGS);
+  }
+
+  if(selectedMusic === 'shuffle-slow'){
+    return getRandomMusicTrack(SLOW_SONGS);
+  }
+
+  return selectedMusic;
+
+}
+
+function getRandomMusicTrack(trackList){
 
   let track;
 
   do{
-    track = MUSIC_TRACKS[
-      Math.floor(Math.random() * MUSIC_TRACKS.length)
+    track = trackList[
+      Math.floor(Math.random() * trackList.length)
     ];
   }while(
-    MUSIC_TRACKS.length > 1 &&
+    trackList.length > 1 &&
     track === lastTrack
   );
 
