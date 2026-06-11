@@ -210,23 +210,30 @@ if(bgMusic){
 
   bgMusic.addEventListener('ended',()=>{
 
-    if(selectedMusic !== 'shuffle')
-      return;
+  if(
+    selectedMusic !== 'shuffle-all' &&
+    selectedMusic !== 'shuffle-fast' &&
+    selectedMusic !== 'shuffle-slow'
+  ){
+    return;
+  }
 
-    const nextTrack =
-      getRandomMusicTrack();
+  const nextTrack =
+    getTrackToPlay();
 
-    bgMusic.src =
-      `audio/${nextTrack}`;
+  bgMusic.src =
+    `audio/${nextTrack}`;
 
-    bgMusic.load();
+  bgMusic.load();
 
-    bgMusic.volume =
-      settings.volume;
+  bgMusic.volume =
+    settings.volume;
 
+  if(settings.music){
     bgMusic.play().catch(()=>{});
+  }
 
-  });
+});
 
 }
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
