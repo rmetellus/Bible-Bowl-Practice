@@ -467,7 +467,7 @@ function getRandomMusicTrack(trackList){
 
   recentTracks.push(track);
 
-  if(recentTracks.length > 5){
+  if(recentTracks.length > 15){
     recentTracks.shift();
   }
 
