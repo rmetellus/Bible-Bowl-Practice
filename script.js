@@ -95,6 +95,11 @@ const SLOW_SONGS = [
 
 ];
 
+const ALL_SONGS = [
+  ...FAST_SONGS,
+  ...SLOW_SONGS
+];
+
 let settings={
   music: localStorage.getItem('bbpMusic') !== 'false',
   quizMusic: localStorage.getItem('bbpQuizMusic') !== 'false',
@@ -337,8 +342,10 @@ function updateLoopMode(){
 
   if(!bgMusic) return;
 
-  bgMusic.loop =
-    selectedMusic !== 'shuffle';
+bgMusic.loop =
+  selectedMusic !== 'shuffle-all' &&
+  selectedMusic !== 'shuffle-fast' &&
+  selectedMusic !== 'shuffle-slow';
 
 }
 
@@ -414,7 +421,7 @@ function changeMusicTrack(){
 
 }
 
-let lastTrack = '';
+let recentTracks = [];
 
 function getTrackToPlay(){
 
@@ -436,18 +443,33 @@ function getTrackToPlay(){
 
 function getRandomMusicTrack(trackList){
 
-  let track;
+  let availableTracks =
+    trackList.filter(
+      t => !recentTracks.includes(t)
+    );
 
-  do{
-    track = trackList[
-      Math.floor(Math.random() * trackList.length)
+  if(availableTracks.length === 0){
+
+    recentTracks = [];
+
+    availableTracks =
+      [...trackList];
+
+  }
+
+  const track =
+    availableTracks[
+      Math.floor(
+        Math.random() *
+        availableTracks.length
+      )
     ];
-  }while(
-    trackList.length > 1 &&
-    track === lastTrack
-  );
 
-  lastTrack = track;
+  recentTracks.push(track);
+
+  if(recentTracks.length > 5){
+    recentTracks.shift();
+  }
 
   return track;
 
