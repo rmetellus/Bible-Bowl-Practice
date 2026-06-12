@@ -1105,24 +1105,6 @@ function showAchievements(){const unlocked=JSON.parse(localStorage.getItem('bbpA
 function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)
 }
 
-document.addEventListener("visibilitychange", () => {
-  if (!bgMusic) return;
-
-  if (document.hidden) {
-    bgMusic.pause();
-  } else {
-    handleMusicForScreen(getActiveScreenId());
-  }
-});
-
-window.addEventListener("pagehide", () => {
-  if (bgMusic) bgMusic.pause();
-});
-
-window.addEventListener("blur", () => {
-  if (bgMusic) bgMusic.pause();
-});
-
 document.addEventListener('keydown', function(e){
 
   if(e.key !== 'Enter') return;
